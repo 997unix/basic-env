@@ -1,5 +1,9 @@
 #. /usr/local/share/chruby/chruby.sh
 
+export GOPATH=$HOME/.go
+export PATH=$GOPATH/bin:$PATH
+
+
 (git config -l|grep -q alias.lol) || git config --global --add alias.lol "log --graph --decorate --pretty=oneline --abbrev-commit --all"
 (git config -l|grep -q alias.co) || git config --global --add alias.co "checkout"
 (git config -l|grep -q alias.st) || git config --global --add alias.st "status"
@@ -10,7 +14,7 @@ git config --global user.email "$LOGNAME@pivotal.io"
 # set the git credential cache to avoid typing id/pass a bunch of times
 git config --global credential.helper 'cache --timeout 1200'
 
-complete -C $HOME/.local/lib/aws/bin/aws_completer aws
+complete -C /usr/local/bin/aws_completer aws
 export ALT_HOME=~/Dropbox/home/thansmann
 export EDITOR=vi
 echo 'bind status C !git ci' >> ~/.tigrc
@@ -132,7 +136,7 @@ less $*
 }
 
 
-biguns () { find $1 -mount -size +${2:-2000} -exec ls -ld {} \; ; }
+biguns () { gfind $1 -mount -size +${2:-2000} -exec ls -ld {} \; ; }
 Fsort () { sort -rn +4 -5 - ; }
 Fsum () { awk '{ s+=$5 }
         END {print s, "bytes" }' ;}
@@ -226,57 +230,46 @@ function nats-ads () {
 }
 
 function prod () {
-  prod_key
-  ssh -A thansmann@jb.run.pivotal.io $*
+  if [[ ! -z "$PIVOTAL_USER" ]] ; then
+    prod_key $PIVOTAL_USER
+  else
+    if [[ ! -z "$1" ]] ; then
+      PIVOTAL_USER=$1
+      shift
+    else
+      PIVOTAL_USER=thansmann
+    fi
+  fi
+  ssh -A $PIVOTAL_USER@jb.run.pivotal.io $*
 }
 
-function rprod () {
+function bird () {
+  if [[ ! -z "$PIVOTAL_USER" ]] ; then
+    prod_key $PIVOTAL_USER
+  else
+    if [[ ! -z "$1" ]] ; then
+      PIVOTAL_USER=$1
+      shift
+    else
+      PIVOTAL_USER=thansmann
+    fi
+  fi
+  ssh -A $PIVOTAL_USER@jb.birdnest.cf-app.com $*
+}
+function jb_root_staging () {
   ssh-add -D
-  chmod 400 $HOME/workspace/prod-aws/config/id_rsa_jb
+  chmod 400 $HOME/workspace/staging-aws/config/id_rsa_jb
   ssh-add -t 4900 $HOME/workspace/prod-aws/config/id_rsa_jb
   ssh -A ubuntu@jb.run.pivotal.io $*
 }
 
-function rprod () {
+function jb_root_prod () {
   ssh-add -D
   chmod 400 $HOME/workspace/prod-aws/config/id_rsa_jb
   ssh-add -t 4900 $HOME/workspace/prod-aws/config/id_rsa_jb
   ssh -A ubuntu@jb-z2.run.pivotal.io $*
 }
 
-function bosh_me () {
-  bosh target $1
-  BOSH_ENV=$(echo $1 | cut -f 2 -d '.' )
-  bosh status
-  bosh deployment $HOME/workspace/deployments-aws/$BOSH_ENV/cf-aws-stub.yml
-}
-
-
-function clear_4222 () {
-  ps aux | grep ssh|grep 4222 | grep -v grep
-  ps aux | grep ssh|grep 4222 | grep -v grep|awk '{print $2}'|xargs kill
-  echo after
-  ps aux | grep ssh|grep 4222 | grep -v grep
-
-}
-
-function cf_tools () {
-(
-w
-git clone git@github.com:cloudfoundry/tools-cf-plugin.git
-
-cd tools-cf-plugin
-  cd tools-cf-plugin/
-  ll
-   gem build tools-cf-plugin.gemspec
-    gem install tools-cf-plugin-*.gem
-    )
-}
-
-function pass () {
-  vim $HOME/workspace/prod-aws/passwords_and_accounts.md
-
-}
 
 function D () {
     date +%F
@@ -285,7 +278,6 @@ function D () {
 function space2slash_s_+() {
  perl -pe 's{\s+}{\\s+}g; print "\n"'
 }
-
 
 bbb(){
   set -x
@@ -333,20 +325,6 @@ function gfd () {
  goddammit
 }
 
-function dea_apps_prod (){
-  check_ssh_keys
-  cf tunnel-nats --director bosh.run.pivotal.io  --gateway thansmann@jb.run.pivotal.io --command dea-apps
-}
-
-function cf_tools (){
-  if [[ ! -z "$*" ]] ; then
-    check_ssh_keys
-    cf tunnel-nats bosh.run.pivotal.io --gateway thansmann@jb.run.pivotal.io  $*
-  else
-    echo "$0 [dea-apps || dea-ads ]"
-  fi
-}
-
 function gonarc() {
   cd ~/workspace/narc
   export GOPATH=$PWD
@@ -386,16 +364,26 @@ function fcd {
 
 function jb() {
   ssh -A thansmann@jb.run.pivotal.io
-
 }
 
 function staging() {
   prod_key
-  ssh -L 25555:bosh.staging.cf-app.com:25555 -A thansmann@jb.staging.cf-app.com
+  if [[ -z $1 ]] ; then
+    ID=thansmann
+  else
+    ID=$1
+  fi
+  ssh -L 25555:bosh.staging.cf-app.com:25555 -A $ID@jb.staging.cf-app.com
 }
 
 function staging2() {
-  ssh -L 25555:bosh.staging.cf-app.com:25555 -A thansmann@jb-z2.staging.cf-app.com
+  prod_key
+  if [[ -z $1 ]] ; then
+    ID=thansmann
+  else
+    ID=$1
+  fi
+  ssh -L 25555:bosh.staging.cf-app.com:25555 -A $ID@jb-z2.staging.cf-app.com
 }
 
 function checklist_reset() {
@@ -410,13 +398,6 @@ function prod_keys() {
   fi
 }
 
-function prod_aws() {
-  kc
-  if [[ ! $(ssh-add -l | grep -q prod-keys) ]] ; then
-    [[ -d ~/workspace/prod-aws ]] || git clone git@github.com:cloudfoundry/prod-aws.git  ~/workspace/prod-aws
-    ssh-add -
-  fi
-}
 
 function whats_in_the_deploy() {
   kc
@@ -448,16 +429,13 @@ function di() {
   bosh -t bosh.dijon.cf-app.com $*
 }
 
-
 function ta() {
   bosh -t bosh.tabasco.cf-app.com $*
 }
 
-
 function job_order() {
   # greps a bosh manifest for the list of jobs
   egrep '^jobs:|^  (name:)' $*
-
 }
 
 function describe-instances (){
@@ -473,8 +451,6 @@ function ssl_decode_csr() {
 
 }
 
-#alias bb='GEMFILE=~/workspace/bosh/Gemfile bundle exec bosh '
-
 pushenv () {
     if [[ -d $dht ]] ; then
       pushd $dht
@@ -488,7 +464,7 @@ pushenv () {
 
 
 function att_spiff(){
- bash -x $HOME/workspace/att_spiffable_template/bin/att_spiff
+  bash -x $HOME/workspace/att_spiffable_template/bin/att_spiff
 }
 
 function aws_ssh_fingerprint () {
@@ -517,22 +493,18 @@ function vts () {
           chmod 755 $f
           vi + $f
           echo $f
-
 }
 
 function f () {
     eval `next_file_named -f foo`
       touch $f
       echo $f
-
 }
 
 function ef () {
       eval `current_file_named -f foo`
       echo $f
-
 }
-
 
 function o () {
         eval `next_file_named -f out`
@@ -550,28 +522,23 @@ function eo () {
 function ej () {
       eval `current_file_named -f jsh`
       echo $j
-
 }
 
 function vj () {
       eval `current_file_named -f jsh`
       vi $j
       echo $j
-
 }
 
 function p () {
         eval `next_file_named -f put`
         touch $p
         echo $p
-
-
 }
 
 function ep () {
       eval `current_file_named -f put`
       echo $p
-
 }
 
 
@@ -579,14 +546,11 @@ function q () {
         eval `next_file_named -f qoo`
         touch $q
         echo $q
-
-
 }
 
 function eq () {
       eval `current_file_named -f qoo`
       echo $q
-
 }
 
 
@@ -595,18 +559,13 @@ function z () {
         eval `next_file_named -f zoo`
         touch $z
         echo $z
-
-
 }
 
 
 function ez () {
       eval `current_file_named -f zoo`
       echo $z
-
 }
-
-
 
 # causes a shell issue i can't figure out - commenting out Wed Mar  3 15:22:10 2010
  function all-e () {
@@ -623,20 +582,20 @@ function ez () {
     o - make a temp output file
     eo - make a temp output file and edit it.
 '
-
- }
+}
 
 
 function migrate_basic_env() {
   if [[ -d ~/workspace/basic-env ]] ; then
     cd ~/workspace/basic-env && git stash && git pull --rebase && git stash pop
   else
-    cd ~/workspace && git clone git@github.com:thansmann/basic-env.git
+    cd ~/workspace && git clone git@github.com:pivotal-cf-experimental/basic-env.git
   fi
+
   if [[ -d ~/workspace/basic-env ]] ; then
     cp -a $dht/{.profile,.screenrc,.tmux.conf} $dht/home_dot_files/.gitconfig ~/workspace/basic-env
     mkdir -p ~/workspace/basic-env/bin
-    cp -a $dht/bin/{push_env,install_bosh+tools,check_ssh_keys,jsh,summarize_jsh,ll,llp,lll,pcut,++,nl2.pl,print_between,tree_perms.pl,kibme,next_file_named,show_swapping_procs,llll} ~/workspace/basic-env/bin
+    cp -a $dht/bin/{gen_sudo_shell_command.bash,aws_NAT_boxes_for_all_regions.bash,push_env,install_bosh+tools,check_ssh_keys,jsh,summarize_jsh,ll,llp,lll,pcut,++,nl2.pl,print_between,tree_perms.pl,kibme,next_file_named,show_swapping_procs,llll} ~/workspace/basic-env/bin
     git commit -a --cleanup=strip -v
   fi
 }
@@ -651,9 +610,6 @@ function new_env() {
   cd ; ~/bin/install_bosh+tools
 }
 
-
-
-
 function gc() {
   pushd ~/workspace
   local repo=$(echo $1| perl -pe 's/\.git$//')
@@ -664,8 +620,8 @@ function gc() {
 }
 
 function tt() {
-f
-$* | tee $f
+  f
+  $* | tee $f
 }
 
 function ssh-keyness() {
@@ -684,7 +640,7 @@ function gerrit_key() {
 }
 
 function prod_key() {
-  ssh-keyness $HOME/workspace/prod-aws/keys/id_rsa_thansmann
+  ssh-keyness $HOME/workspace/prod-aws/keys/id_rsa_$PIVOTAL_USER
 }
 
 function prod_bosh_key() {
@@ -700,37 +656,39 @@ function staging_bosh_key() {
 function staging_jb_key() {
   ssh-keyness $HOME/workspace/staging-aws/config/id_rsa_jb
 }
+function lakitu_jb_key() {
+  ssh-keyness $HOME/workspace/cloudop-ci/config/id_rsa_jb
+}
+
+function lakitu() {
+    lakitu_jb_key
+    ssh -A vcap@jb.lakitu.cf-app.com $*
+}
 
 function sandbox2() {
     gerrit_key
     ssh -AL 25555:10.107.0.10:25555 root@12.144.186.145 $*
-
 }
 
 function sandbox3() {
     gerrit_key
     ssh root@12.144.186.59 $*
-
 }
 
 function sandbox4() {
     gerrit_key
     ssh root@12.144.186.67 $*
-
 }
 
 function stagex() {
     gerrit_key
     ssh  root@12.144.186.18 $*
-
 }
 
 function devx() {
     gerrit_key
     ssh  root@12.144.186.13 $*
-
 }
-
 
 function ssl() {
   cd /Volumes/Untitled/workspace/ssl_certs
@@ -745,7 +703,12 @@ abspath() {
     cd "$OLDPWD"
 }
 
-
+abspath_dir() {
+  local DIR=$(dirname "$1")
+  cd $DIR
+  pwd
+  cd "$OLDPWD"
+}
 
 function bosh_env () {
   THIS_HOST_EXTERNAL_IP=$(curl -s ifconfig.me)
@@ -760,7 +723,7 @@ function bosh_env () {
     ;;
    esac
 
-   parallel "echo %%%%%%%%%% {} %%%%%%%%%% ; bosh -t {} deployments" ::: $BOSHES
+  parallel "echo %%%%%%%%%% {} %%%%%%%%%% ; bosh -t {} deployments" ::: $BOSHES
 
 }
 
@@ -770,15 +733,20 @@ function grH () {
 }
 
 function add_pwd_to_path(){
-echo "Before: $PATH"
-PATH+=":$(pwd)"
-echo "After: $PATH"
+  echo "Before: $PATH"
+  PATH+=":$(pwd)"
+  path_clean
+  echo "After: $PATH"
+}
+
+function path_clean () {
+  PATH=$(perl -e 'my %seen; @NEW = grep !$seen{$_}++, (split /:/, $ENV{PATH}); print join(":", @NEW), "\n" ;')
 }
 
 function ttt(){
  set -x
  (
-  echo "git clone https://github.com/thansmann/basic-env.git ~/basic-env ; . ~/basic-env/.profile"
+  echo "git clone https://github.com/pivotal-cf-experimental/basic-env.git ~/basic-env ; . ~/basic-env/.profile"
   echo new_env
   echo set_prod_bosh_env
   )| pbcopy
@@ -899,8 +867,9 @@ function cf_migrations(){
 }
 
 function aws_prod_ro(){
-  if [[ -f ~/workspace/prod-aws/prod/aws_readonly_keys ]] ; then
-    source ~/workspace/prod-aws/prod/aws_readonly_keys
+  if [[ -d ~/workspace/prod-aws/config ]] ; then
+  local RO_KEYS=$(find ~/workspace/prod-aws -name aws_readonly_keys)
+    source $RO_KEYS
     aws $*
     unset AWS_ACCESS_KEY_ID
     unset AWS_SECRET_ACCESS_KEY
@@ -952,4 +921,59 @@ Host jb*.cf-app.com
   UserKnownHostsFile /dev/null
 ' >> ~/.ssh/config
 fi
+}
+
+function tmate_install() {
+  staging_jb_key
+  for i in 1 2 ; do
+  ssh -A ubuntu@jb-z$i.staging.cf-app.com "
+    sudo apt-get install -y python-software-properties && \
+    sudo add-apt-repository ppa:nviennot/tmate      && \
+    sudo apt-get update                             && \
+    sudo apt-get install -y tmate
+   "
+ done
+
+}
+
+
+function bosh_jobs_list() {
+  for i in $* ; do
+    echo -e "Jobs for $i\n===================="
+    print_between -s '^jobs:' -e '^network' $i --not-last |
+    egrep '^name' |
+    perl -pe 's/_z\d+//xms' |
+    pcut |
+    uniq
+    echo
+  done
+}
+
+function vim_config() {
+  git clone https://github.com/Casecommons/vim-config.git ~/.vim
+  cd ~/.vim
+  git submodule update --init --recursive
+  ln -s ~/.vim/vimrc ~/.vimrc
+  mv init/casebook2.vim after/
+  echo '
+:set nu
+au WinLeave * set nocursorline nocursorcolumn
+au WinEnter * set cursorline cursorcolumn
+set cursorline cursorcolumn
+let &colorcolumn=join(range(81,999),",")
+highlight ColorColumn ctermbg=235 guibg=#2c2d27' >> ~/.vimrc.local
+}
+
+function mac_dns_idiocy () {
+  # you know, for when cli resovling just stops working! Mac OS 10.10+
+  sudo launchctl kickstart -k system/com.apple.networking.discoveryd
+}
+
+function movie-move () {
+   ssh ayn id || { echo ssh not working to ayn ; exit ; }
+   cd ~/Movies && find . -maxdepth 1 |
+      parallel --keep -rt -j 8 \
+      rsync --remove-source-files -ahv {} thansmann@ayn:/usr/local/media/Media/Videos
+   find . -type d -empty -delete
+
 }
