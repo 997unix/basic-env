@@ -1,0 +1,29 @@
+#
+## Mac OS-X does not come with the delightfully useful `timeout` program.  Thankfully a rough BASH equivalent can be achieved with only 2 perl statements.
+#
+## Originally found on SO: http://stackoverflow.com/questions/601543/command-line-command-to-auto-kill-a-command-after-a-certain-amount-of-time
+# 
+#  
+  function timeout() { perl -e 'alarm shift; exec @ARGV' "$@"; }
+#   
+#   ## Example usage:
+#   # 
+#   # $ function timeout() { perl -e 'alarm shift; exec @ARGV' "$@"; }
+#   #
+#   # $ timeout 1 sleep 2; echo $?
+#   # Alarm clock: 14
+#   # 142
+#   #
+#   # $ timeout 1 sleep 0.5; echo $?
+#   # 0
+#   #
+#   # $ timeout 1 bash -c 'echo "hi" && sleep 2 && echo "bye"'; echo $?
+#   # hi
+#   # Alarm clock: 14
+#   # 142
+#   #
+#   # $ timeout 3 bash -c 'echo "hi" && sleep 2 && echo "bye"'; echo $?
+#   # hi
+#   # bye
+#   # 0
+#   #

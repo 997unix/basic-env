@@ -1,0 +1,8 @@
+. ~/Dropbox/home/thansmann/.profile
+set -x 
+ssh-add -l |grep -q id_rsa_thansmann || {
+  kc
+}
+ps awxww |grep -v grep |grep -q 'ssh -fN -R2222:localhost:22 thansmann@jb.go.cloudfoundry.com' || {
+  ssh -fN -R2222:localhost:22 thansmann@$jb
+}

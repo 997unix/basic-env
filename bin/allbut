@@ -1,0 +1,17 @@
+#!/usr/bin/perl
+
+if ($ARGV[0] =~ /^\d+$/) {
+    $ALLBUT = shift @ARGV;
+} else {
+    $ALLBUT = 1;
+}
+
+
+while (<ARGV>) {
+    if ($ALLBUT > 0) {
+        $ALLBUT--;
+        next;
+    } else {
+        print $_;
+    }
+}
