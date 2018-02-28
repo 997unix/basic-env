@@ -1,0 +1,88 @@
+set -a 
+. ~vcap/.bashrc
+JOB=$(ruby -ryaml -e 'y = YAML.load_file("/var/vcap//bosh/state.yml"); puts y["job"]["name"]')
+INDEX=$(ruby -ryaml -e 'y = YAML.load_file("/var/vcap//bosh/state.yml"); puts y["index"]') 
+DEPLOYMENT=$(ruby -ryaml -e 'y = YAML.load_file("/var/vcap//bosh/state.yml"); puts y["deployment"]') 
+
+if [[ -d "/var/vcap/jobs/$JOB/config" ]] ; then
+  C="/var/vcap/jobs/$JOB/config"
+else
+  C=$(find  /var/vcap/jobs/*/config -type d|head -1)
+  JOB=$(perl -e '@F=split(q{/}, $ENV{C}); print $F[-2]')
+fi
+
+PS1="$DEPLOYMENT//${JOB}:${INDEX}> "
+
+PS1='\[\033[01;35m\]${DEPLOYMENT}\[\033[00m\] on \u@\[\033[01;32m\]${JOB}\[\033[00m\]:\[\033[01;32m\]${INDEX}\[\033[00m\]\n\[\033[01;34m\]\w\[\033[00m\]\$ '
+
+
+if [[ -f "/var/vcap/sys/log/$JOB/${JOB}.log" ]] ; then
+  L="/var/vcap/sys/log/$JOB/${JOB}.log"
+else
+  L=$(find  /var/vcap/sys/log/ -type f |grep $JOB | egrep 'log$' |head -1)
+fi
+
+alias bl='less /var/vcap/bosh/log/current'
+alias steno='gem install steno --remote'
+alias get_jq='wget -O /usr/local/bin/jq http://stedolan.github.io/jq/download/linux64/jq ; chmod 755 /usr/local/bin/jq'
+alias x='echo'
+alias ll='ls -lart' 
+alias vim='vim.tiny' 
+alias ms='monit summary'
+alias mss='monit status'
+
+
+# Set up pager env vars.
+if  [ ! -z "$(type -path less)" ]
+then
+  export MANPAGER='less'
+  export PAGER='less'
+    # this is what makes less NOT clear the screen when it exits.
+    # added the 'R' so ANSI color stuff comes thru -tony 6/1/30
+  export LESS=-igMQXR
+  alias more="less"
+  alias pg="less"
+  alias les="less"
+  alias le="less"
+fi
+
+PROMPT_COMMAND='echo -ne "\033]0;${JOB}:${INDEX}: ${PWD}\007"' 
+export PERLDB_OPTS="inhibit_exit=1 ReadLine=1"
+alias pd='perl -de 3'
+
+
+alias l.='ldot'
+#
+alias dir='ls -lart|grep ^d'
+alias c='tput clear'
+alias XX='set -x'
+alias xx='set +x'
+
+function lsn () {
+        netstat -lnp --tcp --udp
+}
+
+function fcd () {
+    #
+    [ -f $1  ] && { cd $(dirname $1);  } || { cd $1 ;  }
+    pwd
+}
+
+function lless () {
+    less `ls -Art1|tail -1`
+}
+
+function ht () {
+  head -1 $1
+  tail -1 $1
+}
+
+function job_log () {
+  less ${L}/${JOB}.log
+}
+
+LL=/var/vcap/sys/log
+SL=/var/vcap/store/log
+J=/var/vcap/jobs/
+P=/var/vcap/packages/
+B=/var/vcap/bosh

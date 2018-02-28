@@ -1,0 +1,14 @@
+## all stuff to ignore -T Sun May 27 19:13:11 PDT 2012
+RCS/**/* 
+RCS/
+RCS/*
+*sh_history
+
+# Use wildcards as well
+\#*\#
+*~
+*.swp
+.\#*
+# Can also ignore all directories and files in a directory.
+tmp/**/* 
+
