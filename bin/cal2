@@ -1,0 +1,13 @@
+#!/bin/bash
+# cal -3 is too much, I just want this month and next month
+# use the nice shell "treat the output of this command as a file" notation
+
+case $(uname -a) in
+   Darwin)
+     DATE=$(type -a gdate)
+     ;;
+   *)
+     DATE=$(type -a date)
+
+paste <(cal -h  $($DATE -d "this month" +"%m %Y") ) <(cal -h $($DATE -d "next month" +"%m %Y") )
+
