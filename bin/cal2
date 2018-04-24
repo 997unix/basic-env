@@ -2,12 +2,18 @@
 # cal -3 is too much, I just want this month and next month
 # use the nice shell "treat the output of this command as a file" notation
 
-case $(uname -a) in
+OS_TYPE=$(uname -s)
+
+case ${OS_TYPE} in
    Darwin)
-     DATE=$(type -a gdate)
+     PATH+=":/usr/local/bin"
+     DATE=$(type -P gdate)
      ;;
    *)
-     DATE=$(type -a date)
+     DATE=$(type -P date)
+     ;;
+esac
 
-paste <(cal -h  $($DATE -d "this month" +"%m %Y") ) <(cal -h $($DATE -d "next month" +"%m %Y") )
-
+paste \
+        <(cal -h $($DATE -d "this month" +"%m %Y") ) \
+        <(cal -h $($DATE -d "next month" +"%m %Y") )
