@@ -1,7 +1,6 @@
 #. /usr/local/share/chruby/chruby.sh
 
-export GOPATH=$HOME/.go
-export PATH=$GOPATH/bin:$PATH
+export PATH+=:$HOME/bin:$HOME/basic-env/bin
 
 
 (git config -l|grep -q alias.lol) || git config --global --add alias.lol "log --graph --decorate --pretty=oneline --abbrev-commit --all"
