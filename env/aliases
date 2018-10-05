@@ -1,113 +1,16 @@
-#!/bin/bash
-##########  Wed Nov  5 14:53:44 MST 1997
-########
-### After have some problems with functions i have determined that
-##  you may not have a one or two letter function defined in the format
-# r () {
-# foo
-# }
-
-# It has to be:
-# function r {
-# foo
-# }
-
-# Lame
-# $Header: /home/tony/env/RCS/aliases,v 1.14 2005/10/18 18:00:27 thansmann Exp $
-# $Author: thansmann $
-# $Date: 2005/10/18 18:00:27 $
-# 
-# $Log: aliases,v $
-# Revision 1.14  2005/10/18 18:00:27  thansmann
-# *** empty log message ***
-#
-# Revision 1.12  2000/08/11 20:17:49  tony
-# taking out all the 'function' keywords
-# tony
-#
-# Revision 1.11  1998/11/30 21:02:14  tony
-# added more useful stuff
-# -tony
-#
-# Revision 1.10  1998/11/20 15:06:09  tony
-# added a nice short cut for compiling my java stuff
-# -tony
-#
-# Revision 1.9  1998/11/05 20:25:32  tony
-# added a cdlist command to print numbers on my command line for programming tracks
-#
-# Revision 1.8  1998/10/13 18:47:34  tony
-# added more java managment things
-#
-# Revision 1.7  1998/10/08 16:01:44  tony
-# adding more aliases
-#
-# Revision 1.6  1998/09/29 16:22:49  tony
-# added more stuff to Zip around the dir struct
-#
-# Revision 1.5  1998/08/11 23:30:57  tony
-# added a print to falcon function
-#
-# Revision 1.4  1998/07/08 20:20:03  tony
-# added some asd specific things.
-# tony
-#
-# Revision 1.3  1998/06/25 00:14:39  tony
-# took out my mpage alias
-#
-# Revision 1.2  1998/06/15 20:09:41  tony
-# just the first of many changes i will have to make at ads
-#  $cc$
-##################################################
-#alias III='ircII'
-#alias sp='. $HOME/.profile'
-#alias sk='. $HOME/env/kshrc'
-alias which='whence'
-alias xtime='xclock -analog -fg red -bg black -hd black -hl green -bd red -rv -update 1 -geom 91x83+1186+50 &'
 alias ll='ls -lart'
 alias l.='ldot'
 #
 alias dir='ls -lart|grep ^d'
-alias pa='. $te/aliases'
+alias pa='. $HOME/basic_env/env/aliases'
 alias ps1='eval "export PS1=\"\`uname -n\`:\${LOGNAME}> \""'
 alias c='tput clear'
 alias n='nslookup'
 alias cut='pcut'
-###############Function defs, for when  aliases wont do#
-# genfr () {
-# sp 
-# sk
-# frules=~/.elm/filter-rules
-# varrules=~/.elm/filter-rules.var
-# echo writing $frules
-# #
-# perl -pe 's/\$(\w*)/$ENV{$1}/' $varrules > $frules
-# #echo you should really change this to a 'make' setup
-# (filter -r|egrep "\*\* always \*\*" > /dev/null) || echo "didn't not get the expected rules list"
-# echo =========== done ============
-# }
-
-
-
-# set shell vars for last 10 jsh output files
-# slower than I'd like, may have to see if perl is faster than the shell
-function j_list () {
-eval $( 
-    i=''
-    jcount=9
-    (( tail_count = jcount + 1 ))
-    for i in `ls -rt1 /home/thansmann/tmp/jsh/jsh*|tail -${tail_count}`
-      do
-      [ $jcount == 0   ] && jcount=''
-      echo "export j${jcount}=$(dirname $i)/$(basename $i)"
-      (( jcount = jcount - 1 ))
-      done
-   )
-}
 
 # set shell vars for last 10 foo temp  files
 # allows the idiom: it; echo bar > $f; it ; echo baz > $f; f_list; diff $f $f1
-# which seems like a long way around 
+# which seems like a long way around
 function f_list () {
     eval $(
         i=''
@@ -123,53 +26,6 @@ function f_list () {
     )
 }
 
-
-##############################
-##########
-# Fri Jun 19 13:13:01 2009
-#
-
-function next_file_named  () { 
-
-TMP_DIR=$HOME/tmp/$1
-[ -d $TMP_DIR  ] || mkdir -p $TMP_DIR
-    for i in `seq 0 1000`;
-    do
-        FILE=$TMP_DIR/$1-$i;
-        if [ -f "$FILE" ]; then
-            (( c = c + 1 )) 
-        else
-            nf=$FILE;
-            echo $nf;
-            return;
-        fi;
-    done
-}
-
-
-
-function current_file_named () { 
-
-TMP_DIR=$HOME/tmp/$1
-[ -d $TMP_DIR  ] || mkdir -p $TMP_DIR
-    for i in `seq 0 1000`;
-    do
-        FILE=$TMP_DIR/$1-$i;
-        if [ -f "$FILE" ]; then
-        JUST_SAW=$FILE
-            (( c = c + 1 )) 
-        else
-            nf=$JUST_SAW;
-                echo    
-            echo $nf;
-            return;
-        fi;
-    done
-}
-
-
-
-
 rs () {
 eval `resize`
 }
@@ -179,13 +35,12 @@ eval `resize`
 function sp {
 . ~/.profile
 }
- 
+
 # one of my many functions does a source on my profile and make life
 # easy
 vp () {
 vi ~/.profile
 }
- 
 
 function le () {
 less $*
@@ -195,16 +50,13 @@ function les () {
 less $*
 }
 
-
-biguns () { find $1 -mount -size +${2:-2000} -exec ls -ld {} \; ; }
-Fsort () { sort -rn +4 -5 - ; }
-Fsum () { awk '{ s+=$5 }
-        END {print s, "bytes" }' ;}
-sbiguns () { biguns $1 $2 | Fsort ; }
+function lessn () {
+less -N $*
+}
 
 
 function ldot {
-ls -al $1|perl -n -e 'if ( /^-/ ) {split;if (@_[-1] =~ /^\..*$/) {print "@_[-1] \n";}}' 
+ls -al $1|perl -n -e 'if ( /^-/ ) {split;if (@_[-1] =~ /^\..*$/) {print "@_[-1] \n";}}'
 }
 
 function d {
@@ -219,7 +71,7 @@ perl -MCPAN -e shell;
 
 
 ## funky su. idea stolen from leo.
-_su () 
+_su ()
 {
       OS=`uname -s`
       echo "in case you want to come back ($OS):"
@@ -231,7 +83,7 @@ _su ()
       else
 	SU="su - root -c \"exec /usr/bin/env bash --login -ao emacs\""
       fi
-	
+
 	# dumb backward thing
       if [ ! `type bash 2>&1 > /dev/null` ]
       then
@@ -240,42 +92,21 @@ _su ()
 	(
 	LOGNAME=root
 	USER=root
-	su - root -c "exec /usr/bin/ksh -ao emacs" 
+	su - root -c "exec /usr/bin/ksh -ao emacs"
 	)
       fi
 }
-##
-# Takes a device/filename/resource and lists processes
-# associated with it via fuser.
-##
-Fuser () { 
-if [[ "${LOGNAME}" != "root" ]]
-then
-        echo "Need to be root to read /dev/kmem."
-        return
-fi
-typeset -L RESPONSE
-RESPONSE=`fuser $1 2>/dev/null`
-if [ -n "${RESPONSE}" ]
-then
-        ps -f -p "$RESPONSE"
-else
-        echo "No processes associated with $1"
-fi
-
-}
-
 
 function pse {
 	ps -ef|egrep -i $1|grep -v grep
 }
 
 function pst {
-	ps -ef|grep $LOGIN|grep -v grep 
+	ps -ef|grep $LOGIN|grep -v grep
 }
 
 
-function lart { 
+function lart {
 	ls -lart $*
 	 }
 
@@ -284,51 +115,11 @@ lart $*
 }
 
 
-
-function srcprep {
-  for i in  ${1}
-  do
-   ( echo $i| egrep "gz$" ) && tartarget=$i
-   ( echo $i| egrep "readme$" ) && readmetarget=$i
-  done
-  startPWD=`pwd`
-  #[ -a $i ] || tartarget=${1}*gz && readmetarget=${1}*readme
-  
-
-  echo "The File to untar is: $tartarget "
-  echo "The readme file is:   $readmetarget "
-  echo "The structure of the tar file is:"
-
-  [ -a $i ] || (zcat ${1}*gz |tar -tvf - |head) 
-
-  echo "Should I create a $1 directory to extract the tar file in [ y or n ]?"
-  read loosetar
-
-  ( [ "y" = $loosetar ] &&  mkdir $1  &&  mv $tartarget $1  \
-   &&  mv $readmetarget $1 ) && cd $i && ( zcat ${1}*gz |tar -xvf -)
-  ( [ "y" = $loosetar ] || ( zcat ${1}*gz |tar -xvf -) ) 
-
-  mv $tartarget $startPWD/used.tar.files && echo "moved $tartarget to $startPWD/used.tar.files"
-
-}
-
-
-##############################
-##########
-# Wed Nov 19 15:06:42 MST 1997
-#  shell wrapper for a perl scipt that'll lookup id's on your box and
-# gen a useradd command for it
-pwau () {
-perl -e '(($name,$passwd,$uid,$gid,$quota,$comment,$gcos,$dir,$shell) =  getpwnam($ARGV[0])) or die "no user: $ARGV[0]\n";
-print "useradd -m -d /export/home/$ARGV[0] -c \"$gcos\" -u $uid  -s $shell  $ARGV[0]\n";' $1
-}
-
 _id () {
  echo "id is:"
  echo "	`id`"
  echo "machine is:"
  echo "	`uname -a`"
-
 }
 
 _magic_cd () {
@@ -348,7 +139,6 @@ function p {
 _magic_cd ~/src/perlmod
 }
 
-
 function pd {
 echo "starting perl in debug mode, lib ~/bin and ~/perl/lib are included"
 perl  -I$HOME/bin -I$HOME/perl/lib -de 34
@@ -359,83 +149,13 @@ echo $*
 }
 
 function r {
-	eval `resize`	
+	eval `resize`
 }
 
 function sps {
  PS1="> "
 }
 
-
-function J {
-echo "Using `type -path java` to run"
-	java $(basename $* .java)
-	}
-
-function C {
-echo "Using `type -path javac` to compile"
-	javac $*		
-	}
-
-function cv {
-  echo "Using `type -path javac` to compile verbose"	
-  javac -verbose $*	2>&1 |less
-	}
-
-
-# Tue Aug 18 10:57:10 1998
-# JAVA required env vars
-# really tired of the this whole lame classpath thing. This should
-# solve the problem forever. It will even scale as new things go in the
-# the dir.
-function set_classpath {
-  echo Setting javas CLASSPATH
-  CLASSPATH=`find /usr/local/java  -follow -type f -a -name "[a-zA-Z]*zip" -o -name "[a-zA-Z]*jar" -print|perl -ne 'unless (/demo/i || /example/i) {s/\n/:/; print}'`
-  echo "new CLASSPATH=$CLASSPATH"
-}
-
-
-
-############
-# often want full path to file(s), this gets it for me
-lll () 
-{ 
-    if [ ! -z "$*" ]
-        then
-        for i in $*;
-          do
-            if (echo $i |egrep -q "^/|\.\./")
-                then
-                ls $i
-            else
-                \ls `pwd`/$i;
-            fi
-        done
-    else
-        pwd;
-    fi
-}
-
-
-##########
-# often need to have a file or dir name in scp format
-# box:/full/path/to/file, this gets it for me
-llll () { 
-    if [ ! -z "$*" ]
-    then
-      for i in $*
-      do
-        if (echo $i |egrep -q "^/|\.\./")
-        then
-          echo $(hostname):$(\ls $i);
-        else
-          echo $(hostname):$(\ls `pwd`/$i);
-        fi
-      done
-  else
-    echo $(hostname):`pwd`;
-  fi
-}
 
 
 # find out what time it is when you only have seconds since 1970
@@ -446,7 +166,7 @@ sec2date () {
 
 # find UTC when you have PDT
 function pdt2utc () {
-	date -u -d "$* PDT" 
+	date -u -d "$* PDT"
 }
 
 
@@ -480,31 +200,6 @@ function ule {
         pwd
         }
 
-
-# ##############################
-# ##########
-# # Mon Nov 30 13:33:27 1998
-# # 
-# function java_src_get () {
-#         cd $SWING_HOME
-#         MYSRC=~tony/src/java
-#         unzip -j src.zip $1 -d $MYSRC
-#         file_to_view=$(basename $1)
-#         cd $MYSRC
-#         mv $file_to_view look.${file_to_view}
-#         echo wrote $1 as $MYSRC/look.${file_to_view}
-#         chown tony:tony $MYSRC/look.${file_to_view}
-
-# }
-
-# function java_zip_peek () {
-#         cd $SWING_HOME
-#         unzip -l src.zip |grep $1 
-
-# }
-
-
-# Fri Oct  1 15:41:23 1999
 function pushenv () {
     cd && scp -r .screenrc .profile .bashrc env $1:
     ssh $i "chmod 755 .profile; ln -sf .profile .bash_profile"
@@ -516,13 +211,6 @@ function pushssh () {
     scp  -r .ssh $1:
     cd -
 }
-
-
-function mailtail ()
-{
-    tai64nlocal < ~/tmp/mass_mail/current |less
-}
-
 
 function path () {
     type -p $1
@@ -540,38 +228,14 @@ function llp () {
 }
 
 function d () {
-    pushd . 
+    pushd .
     echo pushed `pwd` onto the stack
 }
 
 function p () {
     popd
-    echo popped to `pwd` 
+    echo popped to `pwd`
 }
-
-
-if  (uname -a |grep -q Cygwin) 
-    then 
-       function ifconfig () {
-	  ipconfig /all
-	 }
-
-       function one () {
-           ssh -t taskmaster "screen -RADO one"
-       }
-
-
-       function two () {
-           ssh -t taskmaster "screen -RADO two"
-       }
-
-       function three () {
-           ssh -t taskmaster "screen -RADO three"
-       }
-
-
-                           
-fi
 
 
 function lsn () {
@@ -592,15 +256,12 @@ function _ps () {
 }
 
 function hold () {
-
     for i in $*
     do
     echo cp\'ing file [ $i ] to [ ${i}.hold ]
     cp $i ${i}.hold
-    done 
+    done
 }
-
-
 
 function lcd () {
 	FILE=`locate $1|egrep "${1}$"|head -1`
@@ -615,262 +276,14 @@ function trail () {
 }
 
 
-# function one () 
-# { 
-#     type one
-#     if [ ! -z $SSH_AGENT_PID  ]
-# 	then
-# 	echo we have a ssh-agent
-# else
-# 	sa
-# fi
-#     screen -RADO one
-# }
 
 
-# function two () 
-# { 
-# type two
-#     if [ ! -z $SSH_AGENT_PID  ]
-#         then
-#         echo we have a ssh-agent
-# else
-#         sa
-# fi
-#     screen -RADO two
-
-# }
-
-# function three () 
-# { 
-# type three
-#     if [ ! -z $SSH_AGENT_PID  ]
-#         then
-#         echo we have a ssh-agent
-# else
-#         sa
-# fi
-#     screen -RADO three
-
-# }
-
-
-function ssh_prep () {
-# disabling this for now - 1/12/07 tony
-#echo killing agent for this session
-#ssh-agent -k 
-#eval `ssh-agent`
-ssh-add  ~/.ssh/id_dsa
-}
-
-alias sa='ssh_prep'
-
-##############################
-##########
-# Tue Oct 25 12:29:08 2005
-#
-function gcp () {
-  if [ ! -z $1 -a ! -z $2 -a ! -z $3 ]
-  then
-    for i in `ghosts $1`
-    do
-      echo scping to $2 to $i:/$3
-      scp $2 $i:$3
-    done
-  else
-    echo "need 3 arguments. $0 <gsh class> <file_to_scp> <destination>"
-  fi
-}
-
-
-
-
-##############################
-##########
-# Tue Oct 25 12:29:08 2005
-#
-function rgcp () {
-  if [ ! -z $1 -a ! -z $2 -a ! -z $3 ]
-  then
-    for i in `ghosts $1`
-    do
-      echo scping to $2 to $i:/$3
-      scp $2 root@${i}:$3
-    done
-  else
-    echo "need 3 arguments. $0 <gsh class> <file_to_scp> <destination>"
-  fi
-}
-
-##############################
-##########
-# Tue Oct 25 12:29:03 2005
-#
-function push_sa () {
-  type push_sa
-  gcp all ~/std.aliases.sh /root/
-}
-
-
-
-
-##############################
-##########
-# Tue Jan 16 11:18:40 2007
-# copies a live file or dir for safe keeping and autochecks it in to RCS as 
-# one more saftey measure. Trival to use - massively valuable when you need to recover.
-function stow () {
-
-# can adjust for your local env
-VAULT=/usr/local/src/localization
-
-  # this will handle dirs or files 
-if [ ! -d $1 ] 
-then
-  DIR=`dirname $1`
-  FILE=`basename $1`
-else
-    DIR=$1
-fi
-
-
-# make sure the entire tree we'll need exists.  
-  if [ ! -d $VAULT/$DIR/RCS ]
-    then
-      mkdir -p $VAULT/$DIR/RCS
-  fi
-
-  echo saving $1 in $VAULT/$1
-  # if the file exists, check it in.
-
-  if [ -f $VAULT/$1 ]
-      then
-      # use a sub-shell so we don't cd somewhere unexpectedly
-      # do a checkin and add note that this is an autosave.
-      ( cd $VAULT/$DIR
-      ci -l -t-"autosave" -m"autosave from stow funtion" $VAULT/$1
-      )
-      cp -a $1 $VAULT/$DIR
-
-  elif [ -d $VAULT/$1 ]
-    then
-      (
-	  cd  $VAULT/$1
-	  for i in `find . -type d|egrep -v RCS`
-	    do
-	    _cwd=`pwd`
-	  cd $i
-	  ci -l -t-"autosave" -m"autosave from stow funtion" *
-	  cd $_cwd
-	  done
-	  )
-      rsync -av --exclude="*/RCS/*" $1 $VAULT/$DIR
-  fi
-
-  # copy the file or dir
-
-
-# lets not get involved in pollution.
-
-
-} # end fuction stow
-##
-###################
-
-
-function bsh () {
-	#bsh for bounce shell
-#	ssh -At gate1 ssh $1
-    ssh -At prod@skeletor.immi.com  ssh tony@syscheck
-}
 
 # generate some activity so sshd don't time us out
 # 'hp' stands for "Hold Portal" as in the d&d spell.
 function hp () {
 while :; do echo -n . ; sleep 300 ;done
 
-} 
-
-
-function pdf () {
-for i in $@
-do
-OUT=/c/tmp/$i.pdf
-fold $i | enscript -2 -U 2 -Gh  -u"$i" --ul-font=Times-Roman60  -M Letter -o - -r| ps2pdf - $OUT
-echo output file is [ $OUT ]
-done
-}
-
-
-
-function pdf4 () {
-for i in $@
-do
-OUT=/c/tmp/$i.pdf
-fold $i | enscript -4 -U 2 -Gh  -u"$i" --ul-font=Times-Roman60  -M Letter -o - -r| ps2pdf - $OUT
-echo output file is [ $OUT ]
-done
-}
-
-##############################
-##########
-# Thu May 24 14:24:19 2007
-# 
-function dbany () {
-
-DBANY=dbany.old.com
-PASS=xxxxxxx
-USER=VVVV
-
-mysql -u${USER} -h${DBANY} -p${PASS} --prompt="dbany:\d> " v2info
-}
-
-
-##############################
-##########
-# Mon Jun 11 11:38:46 2007
-# 
-
-
-function live_nodes () {
-DBANY=dbany.sjc.old.com
-PASS=xxxxxx
-USER=old
-
- mysql -u${USER} -h${DBANY} -p${PASS} -e 'select hostname,is_active from local.nads where nads.is_active = "T"' local
-}
-
-
-function mysqlstdin () {
-
-if [ -f $1 ]
-then 	
-	mysql -uimmi -hdbany.sjc.immi.com '-pxxxxxx'	 < $1
-else
-	echo "can't find file: $1"
-fi
-}
-
-# here's an easy way to this stuff. without arg - give today , with arg give the date.
-function sql_date () {
-# if nothing in our arg we just want today
-    if [ -z "$*" ]; then
-        date -u "+between '%Y-%m-%d 00:00:00' and '%Y-%m-%d 23:59:59' ";
-        return 0;
-fi      
-
-# if -s (for span) is the first arg we need to figure out two date
-# and give them back all glued together. -tony 8/27/07
-if [ $1 = '-s' ]
-then
-        # we want to have a begin and end date
-        sql_date_BEGIN=`date -u -d "$2" "+'%Y-%m-%d %R:%S'" `   
-        sql_date_END=`date -u -d "$3" "+'%Y-%m-%d %R:%S'" `
-        echo "between $sql_date_BEGIN and $sql_date_END"
-
-    else
-        date -u -d "$*" "+between '%Y-%m-%d %R:%S' and '%Y-%m-%d 23:59:59' ";
-    fi
 }
 
 
@@ -886,36 +299,11 @@ fi
 }
 
 
-
-##################
-function lg () {
-	ls -alrt | egrep $1
-}
-
-
-##################
-function wll () {
-    for i in $* 
-      do
-      cygpath -aw $i 
-    done
-}
-
-
-
 ####### Sun Oct 21 13:53:09 PDT 2007
 function list_functions () {
     set | egrep "^* ()$" | egrep '()' | egrep -v '\$|{|^$'
 }
 
-####### Sun Oct 21 21:41:48 PDT 2007
-function auto_function () {
-    AF=$HOME/env/auto_functions;
-    echo -n "####### " >> $AF;
-    date >> $AF;
-    type $1 | perl -ne 'next if $.==1; if ($. == 2){chomp;  print "function ";
-} ; print;' >> $AF
-}
 ####### Mon Oct 22 14:15:03 PDT 2007
 function checksum_here () {
     perl -e 'use CPAN::Checksums; CPAN::Checksums::updatedir(".");'
@@ -937,7 +325,7 @@ function kk () {
 ##############################
 ##########
 # Thu May 28 13:57:25 2009
-# will key a box for you 
+# will key a box for you
 # use like "keybox foobar" OR "keybox user@foobar" it will take
 # ~/.ssh/id_dsa.pub (change for your keytype) and write it to the far
 # $USER/.ssh/authorized_keys file. Assumes you are using ssh-agent, ssh-add
@@ -952,7 +340,7 @@ SSH_PUB_KEY=~/.ssh/id_dsa.pub
 ###
 
 # see is we got user@box, key the 'user' (ie root@hammerforge will
-# have your key added to ~root/.ssh/authorized_Keys) 
+# have your key added to ~root/.ssh/authorized_Keys)
 if (echo $1|grep -q @)
 then
     USER_TO_KEY=`echo $1|cut -f1 -d'@'`
@@ -977,7 +365,7 @@ fi
 
     TEMP_FILE=`mktemp -u`
     # use some ssh options so it doesn't complain about known_hosts.
-         ssh -o  StrictHostKeyChecking=no ${USER_TO_KEY}@${MACHINE_TO_KEY} "cp ~${USER_TO_KEY}/${AUTH_KEYS} ~${USER_TO_KEY}/.ssh/hold_authorized_keys ;echo  \"$LOCAL_KEY\" > $TEMP_FILE ; cat  $TEMP_FILE >> ~${USER_TO_KEY}/${AUTH_KEYS}" 
+         ssh -o  StrictHostKeyChecking=no ${USER_TO_KEY}@${MACHINE_TO_KEY} "cp ~${USER_TO_KEY}/${AUTH_KEYS} ~${USER_TO_KEY}/.ssh/hold_authorized_keys ;echo  \"$LOCAL_KEY\" > $TEMP_FILE ; cat  $TEMP_FILE >> ~${USER_TO_KEY}/${AUTH_KEYS}"
     # do another ssh to confirm you can get back to the box
     # Batchmode causes ssh it quit if the autologin doesn't work
     ssh -o BatchMode=yes ${USER_TO_KEY}@${MACHINE_TO_KEY} "hostname; date ; rm -v  $TEMP_FILE"
@@ -1017,7 +405,7 @@ alias ho='hoard'
 function hostat () {
     echo "procs cpu"
     echo "r b w us sy id"
-    hoard  'vmstat 1 2|tail -1'|pcut -f 1,2,3,4,-3,-2,-1 
+    hoard  'vmstat 1 2|tail -1'|pcut -f 1,2,3,4,-3,-2,-1
 
 }
 
@@ -1057,7 +445,7 @@ function pub () {
 
 function mounted_to () {
          jsh  -g hoard "netstat -a|egrep nfsd|egrep '$1\.'"  | egrep nfsd
-          
+
 }
 
 
@@ -1107,7 +495,7 @@ empty | pcut -f 1,6|perl -a -ne 'if (scalar @F == 1){ ($g) = $F[0] =~ m{(gnoll.*
 #     qstat -f | perl -ne 'm{\s+ d$}xms and print'
 # }
 
-function down () { 
+function down () {
     qstat -f | perl -a -ne '$F[5] =~ m{d}xms and print'
 }
 
@@ -1121,18 +509,18 @@ fi
 ##############################
 ##########
 # Tue Jul 21 13:51:47 2009
-# 
+#
 HOSTNAME=`hostname`
 DESKTOP=nb-thansmann
 if [ $HOSTNAME ==  $DESKTOP  ]
     then
-    
+
     function uru () {
  # some werid networking thing forces me to bounce thru
  # a intermediate machines to get to uru.
         ssh -t root@taskmaster ssh  root@uru
 }
-    
+
     function tsync () {
         TSYNC_LIST="~/bin ~/env ~/etc ~/diary ~/.profile ~/.screenrc ~/work"
         for i in taskmaster uru2 warlord thor gnoll uru umberhulk
@@ -1174,9 +562,9 @@ function et () {
 # got tired of making up tmp file names.
 # get a tmpfile with your userid in it so there's no collisions
 # theres a cleanvt fuction to so you can clear them easily.
-# after you run this the '$f' var has the file you just edited for easy 
+# after you run this the '$f' var has the file you just edited for easy
 # recall - i wrote for this idiom:
-# vi a tmp file, paste some junk, then "grep foo $f" 
+# vi a tmp file, paste some junk, then "grep foo $f"
 function vt () {
       FILE=`next_file_named foo`
           f=$FILE
@@ -1215,7 +603,7 @@ fi
   else
       echo "Dir $FOODIR does not exist"
       return
-  fi	
+  fi
 
 echo
 }
@@ -1236,7 +624,7 @@ function cleanj () {
   else
       echo "Dir $JSHDIR does not exist"
       return
-  fi	
+  fi
 
 echo
 }
@@ -1259,24 +647,24 @@ function thor () {
  ssh -t root@thor bash --login
 }
 
-function cavern02 () { 
-   ssh -t root@cavern02 bash --login 
+function cavern02 () {
+   ssh -t root@cavern02 bash --login
 }
 
-function cavern03 () { 
-   ssh -t root@cavern03 bash --login 
+function cavern03 () {
+   ssh -t root@cavern03 bash --login
 }
 
-function cavern04 () { 
-   ssh -t root@cavern04 bash --login 
+function cavern04 () {
+   ssh -t root@cavern04 bash --login
 }
 
-function cavern05 () { 
-   ssh -t root@cavern05 bash --login 
+function cavern05 () {
+   ssh -t root@cavern05 bash --login
 }
 
-function cavern06 () { 
-   ssh -t root@cavern06 bash --login 
+function cavern06 () {
+   ssh -t root@cavern06 bash --login
 }
 
 
@@ -1292,7 +680,7 @@ for i in jsh
   jcp -g $i  $JSH_PATH /usr/local/bin
   jcp -g $i $JSH_CLUSTER /usr/local/etc
   jsh -g $i   "cd /usr/local/bin; ln -svf $JSH_NAME $JCP_NAME; ln -svf $JSH_NAME $JHOSTS_NAME; ls -lart j\* ; echo export JSH_CLUSTER=/usr/local/etc/`basename.exe $JSH_CLUSTER`  > /etc/profile.d/CGI_jsh.sh; cat /etc/profile.d/CGI_jsh.sh"
-  
+
 done
 
 
@@ -1301,7 +689,7 @@ done
 
 
 
-function whys_my_gnoll_slow ()  { 
+function whys_my_gnoll_slow ()  {
     if [ -z $1 ]; then
         echo $0 requires a host name;
         return 9;
@@ -1319,7 +707,7 @@ function whys_my_gnoll_slow ()  {
 
 
 
-# function whys_my_gnoll_slow ()  { 
+# function whys_my_gnoll_slow ()  {
 #   if [ -z $1 ]; then
 #     echo $0 requires a host name;
 #     return 9;
@@ -1334,7 +722,7 @@ function whys_my_gnoll_slow ()  {
 #   done
 # }
 
- 
+
 
 
 
@@ -1360,7 +748,7 @@ cat<<EOF
 New POC
 wine ILOM 172.22.77.210
 cheese ILOM 172.22.77.212
-# 
+#
 wine: 10.30.3.225
 cheese: 10.30.3.241
 
@@ -1375,10 +763,10 @@ function tm () {
 
 
 function j_list () {
-eval $( 
+eval $(
     i=''
     jcount=9
-    
+
     for i in `ls -rt1 /home/thansmann/tmp/jsh/jsh*|tail -10`
       do
       [ $jcount == 0   ] && jcount=''
