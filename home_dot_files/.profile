@@ -994,3 +994,9 @@ function gym () {
    90days |
    perl -ne '/Sat/ and print "10AM PDT ";  /Mon|Wed/ and print  "6PM PDT " ; print "$_"; /Sat/ and print "---\n"'
 }
+
+# The next line updates PATH for the Google Cloud SDK.
+if [ -f '/Users/thansmann/workspace/google-cloud-sdk/path.bash.inc' ]; then . '/Users/thansmann/workspace/google-cloud-sdk/path.bash.inc'; fi
+
+# The next line enables shell command completion for gcloud.
+if [ -f '/Users/thansmann/workspace/google-cloud-sdk/completion.bash.inc' ]; then . '/Users/thansmann/workspace/google-cloud-sdk/completion.bash.inc'; fi
