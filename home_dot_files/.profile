@@ -996,7 +996,7 @@ function gym () {
 }
 
 # The next line updates PATH for the Google Cloud SDK.
-if [ -f '/Users/thansmann/workspace/google-cloud-sdk/path.bash.inc' ]; then . '/Users/thansmann/workspace/google-cloud-sdk/path.bash.inc'; fi
+if [ -f '$HOME/workspace/google-cloud-sdk/path.bash.inc' ]; then . '$HOME/workspace/google-cloud-sdk/path.bash.inc'; fi
 
 # The next line enables shell command completion for gcloud.
-if [ -f '/Users/thansmann/workspace/google-cloud-sdk/completion.bash.inc' ]; then . '/Users/thansmann/workspace/google-cloud-sdk/completion.bash.inc'; fi
+if [ -f '$HOME/workspace/google-cloud-sdk/completion.bash.inc' ]; then . '$HOME/workspace/google-cloud-sdk/completion.bash.inc'; fi
