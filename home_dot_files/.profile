@@ -18,7 +18,6 @@ git config --global user.email "$LOGNAME@pivotal.io"
 git config --global credential.helper 'cache --timeout 1200'
 
 complete -C /usr/local/bin/aws_completer aws
-export ALT_HOME=~/Dropbox/home/thansmann
 export EDITOR=vi
 echo 'bind status C !git ci' >> ~/.tigrc
 
@@ -33,8 +32,6 @@ export wcf="$HOME/workspace/cf-release"
 export wb="$HOME/workspace/bosh"
 export wp="$HOME/workspace/prod-aws"
 export wt="$HOME/workspace/tools"
-export th_ssh_config="$HOME/Dropbox/home/thansmann/.ssh/config"
-export dht="$HOME/Dropbox/home/thansmann"
 export ssl="/Volumes/Untitled/workspace/ssl_certs"
 
 for path_element in $dht/bin /usr/local/go/bin $HOME/go/bin $EC2_HOME/bin $HOME/bin /usr/local/bin ; do
@@ -57,8 +54,6 @@ alias wb="cd $HOME/workspace/bosh"
 alias wt="cd $HOME/workspace/tools"
 alias wp="cd $HOME/workspace/prod-aws"
 alias wy="cd $HOME/workspace/vcap-yeti"
-alias dht='cd $HOME/Dropbox/home/thansmann'
-alias d='cd $HOME/Dropbox'
 alias b='bundle '
 alias bundel='bundle '
 alias x='echo '
@@ -149,16 +144,6 @@ function ldot {
     ls -al $1|perl -n -e 'if ( /^-/ ) {split;if (@_[-1] =~ /^\..*$/) {print "@_[-1] \n";}}'
 }
 
-function db () {
-  cd ~/Dropbox
-  pwd
-}
-
-function dbh () {
-  cd ~/Dropbox/home/thansmann
-  pwd
-}
-
 function tssh () {
   ssh -F ${th_ssh_config} $*
 }
@@ -198,12 +183,6 @@ function bdm () {
 function seed_etc_profile (){
   sudo ' echo "function sp () { source $dht/.profile ; }" >> /etc/profile'
 }
-
-function th_ssh_key () {
-  chmod 400 $HOME/Dropbox/home/thansmann/.ssh/gerrit_id_rsa
-  ssh-add $HOME/Dropbox/home/thansmann/.ssh/gerrit_id_rsa
-}
-
 alias tkey='th_ssh_key'
 
 function gh () {
@@ -284,14 +263,10 @@ function space2slash_s_+() {
 
 bbb(){
   set -x
-  cat $HOME/Dropbox/home/thansmann/home_dot_files/bosh_job_paste | pbcopy
+  cat $HOME/basic_env/home_dot_files/bosh_job_paste | pbcopy
   set +x
 }
 
-function job_env {
-  cat $HOME/Dropbox/home/runtime/job_env_paste | pbcopy
-  echo "now paste it into the shell on your bosh job"
-}
 
 function bosh_diff_loop(){
   this_deploy=$(bosh -n deployment)
@@ -606,9 +581,9 @@ function migrate_basic_env() {
 function new_env() {
   echo "do setup for a new env"
   cd ; mkdir ~/bin ; install  ~/basic-env/bin/* ~/bin
-  cd ; ln -svf ~/basic-env/.profile .profile
-  cd ; ln -svf ~/basic-env/.screenrc .screenrc
-  cd ; ln -svf ~/basic-env/.tmux.conf .tmux.conf
+  cd ; ln -svf ~/basic-env/home_dot_files/.profile .profile
+  cd ; ln -svf ~/basic-env/home_dot_files/.screenrc .screenrc
+  cd ; ln -svf ~/basic-env/home_dot_files/.tmux.conf .tmux.conf
   cd bin ; ./nl2.pl --egg| xargs -I {} bash -c '{}'
   cd ; ~/bin/install_bosh+tools
 }
@@ -638,9 +613,6 @@ function ssh-keyness() {
   fi
 }
 
-function gerrit_key() {
-  ssh-keyness $HOME/Dropbox/home/thansmann/.ssh/gerrit_id_rsa
-}
 
 function prod_key() {
   ssh-keyness $HOME/workspace/prod-aws/keys/id_rsa_$PIVOTAL_USER
