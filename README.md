@@ -6,8 +6,8 @@ This repos sets up a basic Linux enviornment to interact with a bosh director.
 
 ```
 # ***WARNING: This is meant for a new env and force overwrites ~/.profile***
-cd && git clone git clone git@github.com:thansmann/basic-env.git
-. basic-env/.profile
+cd && git clone https://github.com/thansmann/basic-env.git 
+. basic-env/home_dot_files/.profile
 new_env
 exec $SHELL -l 
 ```
