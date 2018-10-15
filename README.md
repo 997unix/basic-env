@@ -17,9 +17,9 @@ exec $SHELL -l
 1. **Symlinks rc files into ~**
    ***WARNING: This is meant for a new env and force overwrites ~/.profile***
 ```
-.profile ->   ~/basic-env/.profile
-.screenrc ->  ~/basic-env/.screenrc
-.tmux.conf -> ~/basic-env/.tmux.conf
+.profile ->   ~/basic-env/home_dot_files/.profile
+.screenrc ->  ~/basic-env/home_dot_files/.screenrc
+.tmux.conf -> ~/basic-env/home_dot_files/.tmux.conf
 ```
 1. **Adds a ~/bin dir and copies files in place**
 1. **Installs some helpful tools:**
