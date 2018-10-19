@@ -584,6 +584,8 @@ function new_env() {
   cd ; ln -svf ~/basic-env/home_dot_files/.profile .profile
   cd ; ln -svf ~/basic-env/home_dot_files/.screenrc .screenrc
   cd ; ln -svf ~/basic-env/home_dot_files/.tmux.conf .tmux.conf
+  cd ; ln -svf ~/basic-env/home_dot_files/.gitignore_global .gitignore_global
+  git config --global core.excludesfile ~/.gitignore_global
   cd bin ; ./nl2.pl --egg| xargs -I {} bash -c '{}'
   cd ; ~/bin/install_bosh+tools
 }
