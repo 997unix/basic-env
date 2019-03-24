@@ -974,3 +974,17 @@ if [ -f '$HOME/workspace/google-cloud-sdk/path.bash.inc' ]; then . '$HOME/worksp
 
 # The next line enables shell command completion for gcloud.
 if [ -f '$HOME/workspace/google-cloud-sdk/completion.bash.inc' ]; then . '$HOME/workspace/google-cloud-sdk/completion.bash.inc'; fi
+
+function dattach() {
+  docker exec -it $(docker ps | grep -v STATUS | pcut) bash
+}
+
+function mycal3() {
+   cal -3h -m $(gdate -d "now + 1 month" +%B) 2019
+}
+
+
+# from https://gist.github.com/bitops/188a1809121246101e54
+function is_guid() {
+egrep -hir -E '[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}'
+}
