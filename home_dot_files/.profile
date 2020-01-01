@@ -21,6 +21,9 @@ complete -C /usr/local/bin/aws_completer aws
 export EDITOR=vi
 echo 'bind status C !git ci' >> ~/.tigrc
 
+# kubeclt setup
+[[ -f /usr/local/etc/bash_completion.d/kubectl ]] && . /usr/local/etc/bash_completion.d/kubectl
+
 #chruby ruby-1.9.3-p448
 [ -x /usr/libexec/java_home ] && export JAVA_HOME=`/usr/libexec/java_home -v 1.6`
 export maj=cetas-dev-majestic
@@ -41,7 +44,8 @@ done
 export jb=jb.run.pivotal.io
 export staging=jb.staging.cf-app.com
 
-
+alias k='kubectl'
+alias kp='kubectl get pods'
 alias att='cd ~/workspace/BDPaaS'
 alias gti='git'
 alias ll='ls -alrt'
@@ -969,12 +973,6 @@ function gym () {
    perl -ne '/Sat/ and print "10AM PDT ";  /Mon|Wed/ and print  "6PM PDT " ; print "$_"; /Sat/ and print "---\n"'
 }
 
-# The next line updates PATH for the Google Cloud SDK.
-if [ -f '$HOME/workspace/google-cloud-sdk/path.bash.inc' ]; then . '$HOME/workspace/google-cloud-sdk/path.bash.inc'; fi
-
-# The next line enables shell command completion for gcloud.
-if [ -f '$HOME/workspace/google-cloud-sdk/completion.bash.inc' ]; then . '$HOME/workspace/google-cloud-sdk/completion.bash.inc'; fi
-
 function dattach() {
   docker exec -it $(docker ps | grep -v STATUS | pcut) bash
 }
@@ -987,4 +985,18 @@ function mycal3() {
 # from https://gist.github.com/bitops/188a1809121246101e54
 function is_guid() {
 egrep -hir -E '[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}'
+}
+
+function rm_guid_files() {
+   ls -1 | is_guid | xargs -I% rm -v %
+}
+
+# The next line updates PATH for the Google Cloud SDK.
+if [ -f '/Users/thansmann/Downloads/google-cloud-sdk/path.bash.inc' ]; then . '/Users/thansmann/Downloads/google-cloud-sdk/path.bash.inc'; fi
+
+# The next line enables shell command completion for gcloud.
+if [ -f '/Users/thansmann/Downloads/google-cloud-sdk/completion.bash.inc' ]; then . '/Users/thansmann/Downloads/google-cloud-sdk/completion.bash.inc'; fi
+
+function daily_draft(){
+   for i in $(seq 0 90); do  gdate -d "now + $i days" +"mkdir -pv daily_drafts/%Y/%b/%A/%F; touch daily_drafts/%Y/%b/%A/%F/$(uuidgen)" ;done
 }
