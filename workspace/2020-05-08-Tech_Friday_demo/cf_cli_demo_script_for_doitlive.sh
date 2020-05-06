@@ -1,29 +1,43 @@
 # Recorded with the doitlive recorder
 #doitlive shell: /bin/bash
 #doitlive prompt: default
+#doitlive commentecho: true
 
-# show the CF we're interacting with
-cf target
+#List the resident buildpacks
+cf buildpacks
 
-# show our apps, running or not
-cf apps
+#reserve a couple of routes
+#
+#cf create-route development cfapps.io --hostname tech-friday-buildpack
+#cf create-route development cfapps.io --hostname tech-friday-docker-docker-docker
 
-# show bound and unbound routes
-cf routes
+cd $HOME/workspace/test-app
+# Push the test app with no hint to see the buildpacke process
+cf push tech-friday-buildpack --route-path tech-friday-buildpack | tee ~/tmp/tech-friday-buildpack
 
-# show bound and unbound services
-cf services
+# Push the same test app, but as a docker image from https://hub.docker.com/r/cloudfoundry/test-app
+cf push tech-friday-docker-docker-docker -o cloudfoundry/test-app --route-path tech-friday-docker-docker-docker | tee ~/tmp/tech-friday-docker
 
-cd /Users/thansmann/workspace/test-app
-cf push tech-friday-demo
+#scale an app
+cf scale -i 5 tech-friday-buildpack
 
-curl http://tech-friday-demo.cfapps.io/
-curl http://tech-friday-demo.cfapps.io/env
+# Hit the endpoint and dump some info 
+for i in 1 2 3 4 5 ; do lynx -dump http://$(egrep "^routes:" ~/tmp/tech-friday-buildpack | pcut)/ ; done
 
-# dockerfile version
-cf push tech-friday-docker-docker-docker -o cloudfoundry/test-app
-curl http://tech-friday-docker-docker-docker.cfapps.io/
-curl http://tech-friday-docker-docker-docker.cfapps.io/env
+# show the information the app has about itself
+lynx -dump http://$(egrep "^routes:" ~/tmp/tech-friday-buildpack | pcut)/env
 
-# show some logs
-cf logs tech-friday-docker-docker-docker
+# kill the apps via http request
+#
+lynx -dump http://$(egrep "^routes:" ~/tmp/tech-friday-buildpack | pcut)/exit
+
+## show some logs but limit lines
+cf logs --recent tech-friday-buildpack | tail 15
+
+cf stop tech-friday-buildpack
+
+cf logs --recent tech-friday-buildpack | tail 15
+
+cf delete tech-friday-buildpack 
+
+
