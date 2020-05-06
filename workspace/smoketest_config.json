@@ -1,0 +1,15 @@
+{
+  "suite_name"                      : "CF_SMOKE_TESTS",
+  "api"                             : "api.run.pivotal.io",
+  "apps_domain"                     : "cfapps.io",
+  "user"                            : "thansmann@pivotal.io",
+  "password"                        : "SIN5011t@i",
+  "cleanup"                         : true,
+  "logging_app"                     : "",
+  "runtime_app"                     : "",
+  "enable_windows_tests"            : false,
+  "windows_stack"                   : "windows2012R2",
+  "isolation_segment_name"          : "is1",
+  "isolation_segment_domain"        : "is1.bosh-lite.com",
+  "enable_isolation_segment_tests"  : false
+}
