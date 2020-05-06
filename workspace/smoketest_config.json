@@ -15,5 +15,6 @@
   "use_existing_space"              : true,
   "use_existing_org"                : true,
   "org"                             : "Alice",
-  "space"                           : "development"
+  "space"                           : "development",
+  "artifacts_directory"             : "/tmp/smoke-artifacts"
 }
