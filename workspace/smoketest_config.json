@@ -3,7 +3,7 @@
   "api"                             : "api.run.pivotal.io",
   "apps_domain"                     : "cfapps.io",
   "user"                            : "thansmann@pivotal.io",
-  "password"                        : "SIN5011t@i",
+  "password"                        : "cccccccccccc",
   "cleanup"                         : true,
   "logging_app"                     : "",
   "runtime_app"                     : "",
