@@ -6,7 +6,7 @@
 
 ###
 # run: 
-#     while : ; do cf logs tech-friday-go-buildpack ; sleep 5 ;done
+#   o ;  while : ; do cf logs tech-friday-go-buildpack ; sleep 5 ;done | tee $o
 # in another pane
 ###
 # ---------------------------------------- 
