@@ -1,5 +1,15 @@
 #. /usr/local/share/chruby/chruby.sh
 
+
+#  setup python env for the trading robot class
+# 2022-02-12 04:07:12 PM MST
+if command -v pyenv 1>/dev/null 2>&1; then
+  export PYENV_ROOT="$HOME/.pyenv"
+  export PATH="$PYENV_ROOT/bin:$PATH"
+  eval "$(pyenv init --path)"
+  eval "$(pyenv init -)"
+fi
+
 export GOPATH=$HOME/go
 export PATH=$GOPATH/bin:$PATH
 
