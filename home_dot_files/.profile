@@ -1,6 +1,23 @@
 #. /usr/local/share/chruby/chruby.sh
 
 
+
+# >>> conda initialize >>>
+# !! Contents within this block are managed by 'conda init' !!
+__conda_setup="$('/Users/thansmann/miniconda/bin/conda' 'shell.bash' 'hook' 2> /dev/null)"
+if [ $? -eq 0 ]; then
+    eval "$__conda_setup"
+else
+    if [ -f "/Users/thansmann/miniconda/etc/profile.d/conda.sh" ]; then
+        . "/Users/thansmann/miniconda/etc/profile.d/conda.sh"
+    else
+        export PATH="/Users/thansmann/miniconda/bin:$PATH"
+    fi
+fi
+unset __conda_setup
+# <<< conda initialize <<<
+
+
 #  setup python env for the trading robot class
 # 2022-02-12 04:07:12 PM MST
 ##  if command -v pyenv 1>/dev/null 2>&1; then
@@ -42,7 +59,7 @@ for path_element in $dht/bin /usr/local/go/bin $HOME/go/bin $EC2_HOME/bin $HOME/
     [[ -d $path_element ]] && PATH+=":${path_element}"
 done
 
-
+alias b='cd ~/basic-env'
 alias k='kubectl'
 alias kp='kubectl get pods'
 alias att='cd ~/workspace/BDPaaS'
@@ -832,4 +849,3 @@ function daily_draft(){
 # MacPorts Installer addition on 2022-12-05_at_11:12:04: adding an appropriate PATH variable for use with MacPorts.
 export PATH="/opt/local/bin:/opt/local/sbin:$PATH"
 # Finished adapting your PATH environment variable for use with MacPorts.
-
