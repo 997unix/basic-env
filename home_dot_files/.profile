@@ -3,12 +3,12 @@
 
 #  setup python env for the trading robot class
 # 2022-02-12 04:07:12 PM MST
-if command -v pyenv 1>/dev/null 2>&1; then
-  export PYENV_ROOT="$HOME/.pyenv"
-  export PATH="$PYENV_ROOT/bin:$PATH"
-  eval "$(pyenv init --path)"
-  eval "$(pyenv init -)"
-fi
+##  if command -v pyenv 1>/dev/null 2>&1; then
+##    export PYENV_ROOT="$HOME/.pyenv"
+##    export PATH="$PYENV_ROOT/bin:$PATH"
+##    eval "$(pyenv init --path)"
+##    eval "$(pyenv init -)"
+##  fi
 
 export GOPATH=$HOME/go
 export PATH=$GOPATH/bin:$PATH
@@ -34,16 +34,7 @@ echo 'bind status C !git ci' >> ~/.tigrc
 # kubeclt setup
 [[ -f /usr/local/etc/bash_completion.d/kubectl ]] && . /usr/local/etc/bash_completion.d/kubectl
 
-#chruby ruby-1.9.3-p448
-[ -x /usr/libexec/java_home ] && export JAVA_HOME=`/usr/libexec/java_home -v 1.6`
-export maj=cetas-dev-majestic
 export w="$HOME/workspace"
-export wda="$HOME/workspace/deployments-aws"
-export wd="$HOME/workspace/dea_ng"
-export wcc="$HOME/workspace/cloud_controller_ng"
-export wcf="$HOME/workspace/cf-release"
-export wb="$HOME/workspace/bosh"
-export wp="$HOME/workspace/prod-aws"
 export wt="$HOME/workspace/tools"
 export ssl="/Volumes/Untitled/workspace/ssl_certs"
 
@@ -51,8 +42,6 @@ for path_element in $dht/bin /usr/local/go/bin $HOME/go/bin $EC2_HOME/bin $HOME/
     [[ -d $path_element ]] && PATH+=":${path_element}"
 done
 
-export jb=jb.run.pivotal.io
-export staging=jb.staging.cf-app.com
 
 alias k='kubectl'
 alias kp='kubectl get pods'
@@ -60,14 +49,8 @@ alias att='cd ~/workspace/BDPaaS'
 alias gti='git'
 alias ll='ls -alrt'
 alias w="cd $HOME/workspace"
-alias wda="cd $HOME/workspace/deployments-aws"
-alias wd="cd $HOME/workspace/dea_ng"
-alias wcc="cd $HOME/workspace/cloud_controller_ng"
-alias wcf="cd $HOME/workspace/cf-release"
-alias wb="cd $HOME/workspace/bosh"
-alias wt="cd $HOME/workspace/tools"
-alias wp="cd $HOME/workspace/prod-aws"
-alias wy="cd $HOME/workspace/vcap-yeti"
+alias ws="cd $HOME/workspace/Scrivener-work"
+alias wsg="cd $HOME/workspace/Scrivener-work/Scrivener_and_git.scriv"
 alias x='echo '
 alias sg='git status'
 alias e='egrep'
@@ -83,15 +66,8 @@ alias r=$(type -p ruby)
 alias rd=$(type -p rdebug)
 alias XX='set -x'
 alias xx='set +x'
-alias rrh='echo rbenv rehash; rbenv rehash'
-alias bed='bosh edit deployment'
-alias bv='bosh vms'
-alias btl='bosh task last'
-alias btld='bosh task last --debug'
-alias btr='bosh tasks recent 50'
-alias btrn='bosh tasks recent 50 --no-filter'
 alias gpp='git pull --rebase && git push'
-alias gppom='git pull --rebase && git push origin master'
+alias gppom='git pull --rebase && git push origin main'
 alias gst='git status'
 alias pdd='pushd'
 alias pd='popd'
@@ -99,9 +75,9 @@ alias pd='popd'
 
 function sp(){
     if [ -f $dht/.profile ] ; then
-        source $dht/.profile
+        . $dht/.profile
     else
-        source ~/.profile
+        . ~/.profile
     fi
 
 }
@@ -115,20 +91,6 @@ function vp(){
     fi
 
 }
-
-
-
-function be() {
-  if [ "$1" = "green" ]; then
-    shift
-    bundle exec rspec $*
-  else
-    bundle exec $*
-  fi
-}
-
-[[ -d ~/workspace/tools ]] && . ~/workspace/tools/bosh_ssh
-[[ -d ~/workspace/cf-tools ]] && . ~/workspace/cf-tools/bosh_ssh
 
 function known_hosts_kill (){
     o
@@ -176,94 +138,11 @@ function bosh_all () {
   parallel -j5 --keep "bosh -n --color {}" ::: status deployments stemcells releases
 }
 
-function bt () {
-  bosh target $*
-}
-
-function btl () {
-  bosh task last $*
-}
-
-function btr () {
-  bosh tasks recent 15
-}
-
-function bdm () {
-  bosh download manifest $*
-}
-
 function seed_etc_profile (){
   sudo ' echo "function sp () { source $dht/.profile ; }" >> /etc/profile'
 }
+
 alias tkey='th_ssh_key'
-
-function gh () {
-  echo git clone ssh://git@github.com/cloudfoundry/cf-release.git
-}
-
-function tabasco () {
-  bosh_me bosh.tabasco.cf-app.com $*
-  NATS_USER_PASS=$(ruby -ryaml -e 'y = YAML.load_file("#{ENV["HOME"]}/workspace/deployments-aws/tabasco/cf-aws-stub.yml"); puts "#{y["properties"]["nats"]["user"]}:#{y["properties"]["nats"]["password"]}"')
-}
-
-function a1 () {
-  ssh -A thansmann@jb.a1.cf-app.com $*
-  #bosh_me bosh.a1.cf-app.com
-  #NATS_USER_PASS=$( ruby -ryaml -e 'y = YAML.load_file("#{ENV["HOME"]}/workspace/deployments-aws/a1/cf-shared-secrets.yml"); puts "#{y["properties"]["nats"]["user"]}:#{y["properties"]["nats"]["password"]}"' )
-}
-
-function nats-ads () {
-  ( cd $HOME/workspace/tools/nats-inspect
-    go get
-    go install
-    bosh_tunnel nats/0 &
-    echo sleep a 12 sec to let the tunnel come up
-    sleep 12
-    ./nats-inspect -u="nat://${NATS_USER_PASS}@localhost:4222" dea-ads
-  )
-}
-
-function prod () {
-  if [[ ! -z "$PIVOTAL_USER" ]] ; then
-    prod_key $PIVOTAL_USER
-  else
-    if [[ ! -z "$1" ]] ; then
-      PIVOTAL_USER=$1
-      shift
-    else
-      PIVOTAL_USER=thansmann
-    fi
-  fi
-  ssh -A $PIVOTAL_USER@jb.run.pivotal.io $*
-}
-
-function bird () {
-  if [[ ! -z "$PIVOTAL_USER" ]] ; then
-    prod_key $PIVOTAL_USER
-  else
-    if [[ ! -z "$1" ]] ; then
-      PIVOTAL_USER=$1
-      shift
-    else
-      PIVOTAL_USER=thansmann
-    fi
-  fi
-  ssh -A $PIVOTAL_USER@jb.birdnest.cf-app.com $*
-}
-function jb_root_staging () {
-  ssh-add -D
-  chmod 400 $HOME/workspace/staging-aws/config/id_rsa_jb
-  ssh-add -t 4900 $HOME/workspace/prod-aws/config/id_rsa_jb
-  ssh -A ubuntu@jb.run.pivotal.io $*
-}
-
-function jb_root_prod () {
-  ssh-add -D
-  chmod 400 $HOME/workspace/prod-aws/config/id_rsa_jb
-  ssh-add -t 4900 $HOME/workspace/prod-aws/config/id_rsa_jb
-  ssh -A ubuntu@jb-z2.run.pivotal.io $*
-}
-
 
 function D () {
     date +%F
@@ -271,12 +150,6 @@ function D () {
 
 function space2slash_s_+() {
  perl -pe 's{\s+}{\\s+}g; print "\n"'
-}
-
-bbb(){
-  set -x
-  cat $HOME/basic_env/home_dot_files/bosh_job_paste | pbcopy
-  set +x
 }
 
 
@@ -315,18 +188,6 @@ function gfd () {
  goddammit
 }
 
-function gonarc() {
-  cd ~/workspace/narc
-  export GOPATH=$PWD
-  cd src/github.com/vito/narc
-}
-
-function goto {
-  cd ~/workspace/*$1* && \
-    export GOPATH=$PWD && \
-    export PATH=$GOPATH/bin:$PATH && \
-    cd src/*/*/*${2:-$1}*
-}
 
 function virtualbox_start_my_stemcell (){
    epoch=$(date +%s)
@@ -340,40 +201,8 @@ function virtualbox_start_my_stemcell (){
 }
 
 
-function checkman {
-  \curl https://raw.github.com/cppforlife/checkman/master/bin/install | bash -s
-}
-
-function bo {
-  BUNDLE_GEMFILE=~/workspace/bosh/Gemfile bundle exec bosh $*
-}
-
 function fcd {
   cd $(dirname $1)
-}
-
-function jb() {
-  ssh -A thansmann@jb.run.pivotal.io
-}
-
-function staging() {
-  prod_key
-  if [[ -z $1 ]] ; then
-    ID=thansmann
-  else
-    ID=$1
-  fi
-  ssh -L 25555:bosh.staging.cf-app.com:25555 -A $ID@jb.staging.cf-app.com
-}
-
-function staging2() {
-  prod_key
-  if [[ -z $1 ]] ; then
-    ID=thansmann
-  else
-    ID=$1
-  fi
-  ssh -L 25555:bosh.staging.cf-app.com:25555 -A $ID@jb-z2.staging.cf-app.com
 }
 
 function checklist_reset() {
@@ -389,21 +218,8 @@ function prod_keys() {
 }
 
 
-function whats_in_the_deploy() {
-  kc
-  cd ~/workspace/cf-release
-  git fetch
-  git checkout release-candidate
-  ./update
-  bundle install
-  bundle exec git_release_notes html \
-       -f origin/deployed-to-prod \
-       -t origin/release-candidate \
-       -u https://github.com/cloudfoundry/cf-release > ~/Desktop/whats-in-the-deploy.html
-}
-
-function ttmux() {
-  tmux -f $dht/.tmux.conf
+function ttmate() {
+  tmate -f $dht/.tmux.conf
 }
 
 function myip() {
@@ -1008,3 +824,12 @@ if [ -f '/Users/thansmann/Downloads/google-cloud-sdk/completion.bash.inc' ]; the
 function daily_draft(){
    for i in $(seq 0 90); do  gdate -d "now + $i days" +"mkdir -pv daily_drafts/%Y/%b/%A/%F; touch daily_drafts/%Y/%b/%A/%F/$(uuidgen)" ;done
 }
+
+##
+# Your previous /Users/thansmann/.profile file was backed up as /Users/thansmann/.profile.macports-saved_2022-12-05_at_11:12:04
+##
+
+# MacPorts Installer addition on 2022-12-05_at_11:12:04: adding an appropriate PATH variable for use with MacPorts.
+export PATH="/opt/local/bin:/opt/local/sbin:$PATH"
+# Finished adapting your PATH environment variable for use with MacPorts.
+
