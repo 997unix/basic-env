@@ -88,7 +88,47 @@ alias gppom='git pull --rebase && git push origin main'
 alias gst='git status'
 alias pdd='pushd'
 alias pd='popd'
+alias mk='minikube'
 
+
+
+function sk(){
+    #minikube wizardry
+    # vk ek lk - the noun project - view last, edit last, send last, cat last, stream last, learn last [good demo - test drive learning]
+    eval $(next_file_named -v M -f minicube_out)
+    
+    (date "+%F %r %Z" ; mk ip; mk status; kubectl cluster-info ; uuidgen; echo "---" ) > $M ; time /usr/local/bin/minikube $* | tee -a $M
+}
+
+
+function ek(){
+    #minikube wizardry
+    # vk ek lk - the noun project - view last, edit last, send last, cat last, stream last, learn last [good demo - test drive learning]
+    eval $(next_file_named --existing --var M --file minicube_out)
+    vi $M
+}
+
+
+function skls(){
+    sk image ls
+}
+
+###### ttt
+function make-ssh-key() {
+    set -x
+    eval `next_file_named -f id_rsa_key_autogen -v AUTO_SSH`;
+    echo $AUTO_SSH
+    ssh-keygen -t rsa -f $AUTO_SSH
+    set +x
+}
+
+
+function promote-ssh-key() {
+    [[ ! -z $AUTO_SSH ]] && {
+	echo $AUTO_SSH
+	mv -v ${AUTO_SSH}* ~/.ssh/
+    }
+}
 
 function sp(){
     if [ -f $dht/.profile ] ; then
