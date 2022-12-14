@@ -1008,3 +1008,12 @@ if [ -f '/Users/thansmann/Downloads/google-cloud-sdk/completion.bash.inc' ]; the
 function daily_draft(){
    for i in $(seq 0 90); do  gdate -d "now + $i days" +"mkdir -pv daily_drafts/%Y/%b/%A/%F; touch daily_drafts/%Y/%b/%A/%F/$(uuidgen)" ;done
 }
+
+function update_env(){
+   # check keys
+   (ssh git@github.com) && {
+	cd ~/basic-env
+	git stash push -m "Stash $PWD before a pull"
+	git pull
+	}
+}
