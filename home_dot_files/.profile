@@ -13,7 +13,7 @@ fi
 export GOPATH=$HOME/go
 export PATH=$GOPATH/bin:$PATH
 
-for i in "$GOPATH/bin" "$HOME/basic_env/bin" ; do
+for i in "$GOPATH/bin" "$HOME/basic_env/bin" "/opt/homebrew/bin" ; do
   [[ -d $i ]] && PATH+=":$i"
 done  
 
@@ -36,38 +36,20 @@ echo 'bind status C !git ci' >> ~/.tigrc
 
 #chruby ruby-1.9.3-p448
 [ -x /usr/libexec/java_home ] && export JAVA_HOME=`/usr/libexec/java_home -v 1.6`
-export maj=cetas-dev-majestic
 export w="$HOME/workspace"
-export wda="$HOME/workspace/deployments-aws"
-export wd="$HOME/workspace/dea_ng"
-export wcc="$HOME/workspace/cloud_controller_ng"
-export wcf="$HOME/workspace/cf-release"
-export wb="$HOME/workspace/bosh"
-export wp="$HOME/workspace/prod-aws"
 export wt="$HOME/workspace/tools"
-export ssl="/Volumes/Untitled/workspace/ssl_certs"
 
 for path_element in $dht/bin /usr/local/go/bin $HOME/go/bin $EC2_HOME/bin $HOME/bin /usr/local/bin ; do
     [[ -d $path_element ]] && PATH+=":${path_element}"
 done
 
-export jb=jb.run.pivotal.io
-export staging=jb.staging.cf-app.com
 
 alias k='kubectl'
 alias kp='kubectl get pods'
-alias att='cd ~/workspace/BDPaaS'
 alias gti='git'
 alias ll='ls -alrt'
 alias w="cd $HOME/workspace"
-alias wda="cd $HOME/workspace/deployments-aws"
-alias wd="cd $HOME/workspace/dea_ng"
-alias wcc="cd $HOME/workspace/cloud_controller_ng"
-alias wcf="cd $HOME/workspace/cf-release"
-alias wb="cd $HOME/workspace/bosh"
 alias wt="cd $HOME/workspace/tools"
-alias wp="cd $HOME/workspace/prod-aws"
-alias wy="cd $HOME/workspace/vcap-yeti"
 alias x='echo '
 alias sg='git status'
 alias e='egrep'
@@ -84,12 +66,6 @@ alias rd=$(type -p rdebug)
 alias XX='set -x'
 alias xx='set +x'
 alias rrh='echo rbenv rehash; rbenv rehash'
-alias bed='bosh edit deployment'
-alias bv='bosh vms'
-alias btl='bosh task last'
-alias btld='bosh task last --debug'
-alias btr='bosh tasks recent 50'
-alias btrn='bosh tasks recent 50 --no-filter'
 alias gpp='git pull --rebase && git push'
 alias gppom='git pull --rebase && git push origin master'
 alias gst='git status'
@@ -126,9 +102,6 @@ function be() {
     bundle exec $*
   fi
 }
-
-[[ -d ~/workspace/tools ]] && . ~/workspace/tools/bosh_ssh
-[[ -d ~/workspace/cf-tools ]] && . ~/workspace/cf-tools/bosh_ssh
 
 function known_hosts_kill (){
     o
@@ -176,22 +149,6 @@ function bosh_all () {
   parallel -j5 --keep "bosh -n --color {}" ::: status deployments stemcells releases
 }
 
-function bt () {
-  bosh target $*
-}
-
-function btl () {
-  bosh task last $*
-}
-
-function btr () {
-  bosh tasks recent 15
-}
-
-function bdm () {
-  bosh download manifest $*
-}
-
 function seed_etc_profile (){
   sudo ' echo "function sp () { source $dht/.profile ; }" >> /etc/profile'
 }
@@ -201,131 +158,12 @@ function gh () {
   echo git clone ssh://git@github.com/cloudfoundry/cf-release.git
 }
 
-function tabasco () {
-  bosh_me bosh.tabasco.cf-app.com $*
-  NATS_USER_PASS=$(ruby -ryaml -e 'y = YAML.load_file("#{ENV["HOME"]}/workspace/deployments-aws/tabasco/cf-aws-stub.yml"); puts "#{y["properties"]["nats"]["user"]}:#{y["properties"]["nats"]["password"]}"')
-}
-
-function a1 () {
-  ssh -A thansmann@jb.a1.cf-app.com $*
-  #bosh_me bosh.a1.cf-app.com
-  #NATS_USER_PASS=$( ruby -ryaml -e 'y = YAML.load_file("#{ENV["HOME"]}/workspace/deployments-aws/a1/cf-shared-secrets.yml"); puts "#{y["properties"]["nats"]["user"]}:#{y["properties"]["nats"]["password"]}"' )
-}
-
-function nats-ads () {
-  ( cd $HOME/workspace/tools/nats-inspect
-    go get
-    go install
-    bosh_tunnel nats/0 &
-    echo sleep a 12 sec to let the tunnel come up
-    sleep 12
-    ./nats-inspect -u="nat://${NATS_USER_PASS}@localhost:4222" dea-ads
-  )
-}
-
-function prod () {
-  if [[ ! -z "$PIVOTAL_USER" ]] ; then
-    prod_key $PIVOTAL_USER
-  else
-    if [[ ! -z "$1" ]] ; then
-      PIVOTAL_USER=$1
-      shift
-    else
-      PIVOTAL_USER=thansmann
-    fi
-  fi
-  ssh -A $PIVOTAL_USER@jb.run.pivotal.io $*
-}
-
-function bird () {
-  if [[ ! -z "$PIVOTAL_USER" ]] ; then
-    prod_key $PIVOTAL_USER
-  else
-    if [[ ! -z "$1" ]] ; then
-      PIVOTAL_USER=$1
-      shift
-    else
-      PIVOTAL_USER=thansmann
-    fi
-  fi
-  ssh -A $PIVOTAL_USER@jb.birdnest.cf-app.com $*
-}
-function jb_root_staging () {
-  ssh-add -D
-  chmod 400 $HOME/workspace/staging-aws/config/id_rsa_jb
-  ssh-add -t 4900 $HOME/workspace/prod-aws/config/id_rsa_jb
-  ssh -A ubuntu@jb.run.pivotal.io $*
-}
-
-function jb_root_prod () {
-  ssh-add -D
-  chmod 400 $HOME/workspace/prod-aws/config/id_rsa_jb
-  ssh-add -t 4900 $HOME/workspace/prod-aws/config/id_rsa_jb
-  ssh -A ubuntu@jb-z2.run.pivotal.io $*
-}
-
-
 function D () {
     date +%F
 }
 
 function space2slash_s_+() {
  perl -pe 's{\s+}{\\s+}g; print "\n"'
-}
-
-bbb(){
-  set -x
-  cat $HOME/basic_env/home_dot_files/bosh_job_paste | pbcopy
-  set +x
-}
-
-
-function bosh_diff_loop(){
-  this_deploy=$(bosh -n deployment)
-  deployment_name=$(basename $this_deploy)
-  local tmp_file=~/tmp/${deployment_name}_$(date +%F)
-  mkdir -p ~/tmp
-  cp -v $this_deploy $tmp_file
-  while :
-    do
-      bosh -n diff $1
-      vi  $this_deploy
-      cp $tmp_file $this_deploy
-      read -p "Again (ctrl-c otherwise): " noskdie_ignore
-    done
-}
-
-function dang() {
-  bosh -n deploy
-}
-
-function goshdarnit() {
-  bosh -n upload release && dang
-}
-
-function goddammit() {
-  bosh -n create release --force && goshdarnit
-}
-
-function gfd () {
- cd ~/workspace/cf-release
- bosh target
- bosh deployment
- read -p "Press any key to continue: " arlksxi_ignore
- goddammit
-}
-
-function gonarc() {
-  cd ~/workspace/narc
-  export GOPATH=$PWD
-  cd src/github.com/vito/narc
-}
-
-function goto {
-  cd ~/workspace/*$1* && \
-    export GOPATH=$PWD && \
-    export PATH=$GOPATH/bin:$PATH && \
-    cd src/*/*/*${2:-$1}*
 }
 
 function virtualbox_start_my_stemcell (){
@@ -344,16 +182,8 @@ function checkman {
   \curl https://raw.github.com/cppforlife/checkman/master/bin/install | bash -s
 }
 
-function bo {
-  BUNDLE_GEMFILE=~/workspace/bosh/Gemfile bundle exec bosh $*
-}
-
 function fcd {
   cd $(dirname $1)
-}
-
-function jb() {
-  ssh -A thansmann@jb.run.pivotal.io
 }
 
 function staging() {
@@ -376,32 +206,6 @@ function staging2() {
   ssh -L 25555:bosh.staging.cf-app.com:25555 -A $ID@jb-z2.staging.cf-app.com
 }
 
-function checklist_reset() {
-  perl  -pe 's{\[x\]}{[ ]}g' $1
-}
-
-function prod_keys() {
-  kc
-  if [[ ! $(ssh-add -l | grep -q prod-keys) ]] ; then
-    [[ -d ~/workspace/prod-keys ]] || git clone git@github.com:cloudfoundry/prod-keys.git  ~/workspace/prod-keys
-    kc
-  fi
-}
-
-
-function whats_in_the_deploy() {
-  kc
-  cd ~/workspace/cf-release
-  git fetch
-  git checkout release-candidate
-  ./update
-  bundle install
-  bundle exec git_release_notes html \
-       -f origin/deployed-to-prod \
-       -t origin/release-candidate \
-       -u https://github.com/cloudfoundry/cf-release > ~/Desktop/whats-in-the-deploy.html
-}
-
 function ttmux() {
   tmux -f $dht/.tmux.conf
 }
@@ -413,19 +217,6 @@ function myip() {
 function grep_ip(){
 grep -E "(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)" $*
 
-}
-
-function di() {
-  bosh -t bosh.dijon.cf-app.com $*
-}
-
-function ta() {
-  bosh -t bosh.tabasco.cf-app.com $*
-}
-
-function job_order() {
-  # greps a bosh manifest for the list of jobs
-  egrep '^jobs:|^  (name:)' $*
 }
 
 function describe-instances (){
@@ -452,10 +243,6 @@ pushenv () {
     popd
 }
 
-
-function att_spiff(){
-  bash -x $HOME/workspace/att_spiffable_template/bin/att_spiff
-}
 
 function aws_ssh_fingerprint () {
   echo "This needs the private key to generate the digest aws uses"
@@ -574,15 +361,15 @@ function ez () {
 '
 }
 
-
+#TODO 2023-05-29 01:58:14 PM MST has bad paths, not a bad func, but needs help
 function migrate_basic_env() {
-  if [[ -d ~/workspace/basic-env ]] ; then
+  if [[ -d ~/basic-env ]] ; then
     cd ~/workspace/basic-env && git stash && git pull --rebase && git stash pop
   else
     cd ~/workspace && git clone git@github.com:pivotal-cf-experimental/basic-env.git
   fi
 
-  if [[ -d ~/workspace/basic-env ]] ; then
+  if [[ -d ~/basic-env ]] ; then
     cp -a $dht/{.profile,.screenrc,.tmux.conf} $dht/home_dot_files/.gitconfig ~/workspace/basic-env
     mkdir -p ~/workspace/basic-env/bin
     cp -a $dht/bin/{gen_sudo_shell_command.bash,aws_NAT_boxes_for_all_regions.bash,push_env,install_bosh+tools,check_ssh_keys,jsh,summarize_jsh,ll,llp,lll,pcut,++,nl2.pl,print_between,tree_perms.pl,kibme,next_file_named,show_swapping_procs,llll} ~/workspace/basic-env/bin
@@ -599,7 +386,6 @@ function new_env() {
   cd ; ln -svf ~/basic-env/home_dot_files/.gitignore_global .gitignore_global
   git config --global core.excludesfile ~/.gitignore_global
   cd bin ; ./nl2.pl --egg| xargs -I {} bash -c '{}'
-  cd ; ~/bin/install_bosh+tools
 }
 
 function gc() {
@@ -628,63 +414,6 @@ function ssh-keyness() {
 }
 
 
-function prod_key() {
-  ssh-keyness $HOME/workspace/prod-aws/keys/id_rsa_$PIVOTAL_USER
-}
-
-function prod_bosh_key() {
-  ssh-keyness $HOME/workspace/prod-aws/config/id_rsa_bosh
-}
-
-function prod_jb_key() {
-  ssh-keyness $HOME/workspace/prod-aws/config/id_rsa_jb
-}
-function staging_bosh_key() {
-  ssh-keyness $HOME/workspace/staging-aws/config/id_rsa_bosh
-}
-function staging_jb_key() {
-  ssh-keyness $HOME/workspace/staging-aws/config/id_rsa_jb
-}
-function lakitu_jb_key() {
-  ssh-keyness $HOME/workspace/cloudop-ci/config/id_rsa_jb
-}
-
-function lakitu() {
-    lakitu_jb_key
-    ssh -A vcap@jb.lakitu.cf-app.com $*
-}
-
-function sandbox2() {
-    gerrit_key
-    ssh -AL 25555:10.107.0.10:25555 root@12.144.186.145 $*
-}
-
-function sandbox3() {
-    gerrit_key
-    ssh root@12.144.186.59 $*
-}
-
-function sandbox4() {
-    gerrit_key
-    ssh root@12.144.186.67 $*
-}
-
-function stagex() {
-    gerrit_key
-    ssh  root@12.144.186.18 $*
-}
-
-function devx() {
-    gerrit_key
-    ssh  root@12.144.186.13 $*
-}
-
-function ssl() {
-  cd /Volumes/Untitled/workspace/ssl_certs
-  pwd
-}
-
-
 abspath() {
     local DIR=$(dirname "$1")
     cd $DIR
@@ -697,23 +426,6 @@ abspath_dir() {
   cd $DIR
   pwd
   cd "$OLDPWD"
-}
-
-function bosh_env () {
-  THIS_HOST_EXTERNAL_IP=$(curl -s ifconfig.me)
-  case $THIS_HOST_EXTERNAL_IP in
-  54.85.115.27)
-    bosh target micro.run.pivotal.io micro
-    bosh target bosh.run.pivotal.io prod
-    BOSHES="micro prod"
-    ;;
-  *)
-       echo "ERROR: $(basename $0) does not know external IP [${THIS_HOST_EXTERNAL_IP}]"
-    ;;
-   esac
-
-  parallel "echo %%%%%%%%%% {} %%%%%%%%%% ; bosh -t {} deployments" ::: $BOSHES
-
 }
 
 
@@ -737,158 +449,19 @@ function ttt(){
  (
   echo "git clone https://github.com/pivotal-cf-experimental/basic-env.git ~/basic-env ; . ~/basic-env/.profile"
   echo new_env
-  echo set_prod_bosh_env
   )| pbcopy
  set +x
 }
 
-function set_prod_bosh_env(){
-  mkdir -p ~/jb_env
-
-  if [[ -s ~/jb_env/our-ip ]] ; then
-    OUR_IP=$(cat  ~/jb_env/our-ip)
-  else
-    OUR_IP=$(curl -s ifconfig.me 2> /dev/null)
-    echo $OUR_IP > ~/jb_env/our-ip
-  fi
-
-  case $OUR_IP in
-    54.210.178.15)
-      JB_NAME=jb-z1.staging.cf-app.com
-      MAIN_DEPLOY=cf-staging
-      BOSH_TARGET=bosh.staging.cf-app.com
-      BOSH_TREE=~/workspace/staging-aws
-    ;;
-
-    54.210.167.180)
-      JB_NAME=jb-z2.staging.cf-app.com
-      MAIN_DEPLOY=cf-staging
-      BOSH_TARGET=bosh.staging.cf-app.com
-      BOSH_TREE=~/workspace/staging-aws
-    ;;
-
-    54.85.115.27)
-      JB_NAME=jb-z1.run.pivotal.io
-      MAIN_DEPLOY=cf-cfapps-io2
-      BOSH_TARGET=bosh.run.pivotal.io
-      BOSH_TREE=~/workspace/prod-aws
-    ;;
-
-    54.84.228.119)
-      JB_NAME=jb-z2.run.pivotal.io
-      MAIN_DEPLOY=cf-cfapps-io2
-      BOSH_TARGET=bosh.run.pivotal.io
-      BOSH_TREE=~/workspace/prod-aws
-    ;;
-
-    *)
-      echo "IP Address [$OUR_IP] is unknown - guessing prod"
-      MAIN_DEPLOY=cf-cfapps-io2
-      BOSH_TARGET=bosh.run.pivotal.io
-      BOSH_TREE=~/workspace/prod-aws
-    ;;
-  esac
-
-  bosh target $BOSH_TARGET
-  main_manifest
-
-  all_bosh_vms
-}
-
-
 function vms_sane(){
       grep_ip | tr -d '|' | pcut -f 1,-1
 }
-
-function main_manifest(){
-  if (bosh task last > /dev/null) ; then
-     bosh -n download manifest $MAIN_DEPLOY ~/tmp/${MAIN_DEPLOY}.yml &
-     bosh_all
-   else
-     echo "ERROR: need to login to $BOSH_TARGET"
-   fi
-}
-
-function all_bosh_vms() {
-  mkdir -p ~/tmp/vms
-  bosh deployments | cut -f 2 -d '|'|egrep -v Name| egrep '^ [[:alpha:]]' | tr -d ' ' |
-    parallel -j9  -rt 'bosh vms --details {} > ~/tmp/vms/{}.yml'
-
-}
-
-function vms() {
-   if [[ ! -z $MAIN_DEPLOY ]]; then
-   [[ -d ~/tmp/vms ]] ||  all_bosh_vms
-   if [[ ! -z $* ]] ; then
-     echo "vms list to cat: "
-     select VM_LIST in ~/tmp/vms/*.yml ; do
-       cat $VM_LIST
-       break
-     done
-   else
-     cat ~/tmp/vms/${MAIN_DEPLOY}.yml
-  fi
- else
-    set_prod_bosh_env
- fi
-}
-
 
 function pull_basic-env(){
   pushd ~/basic-env
   git pull
   popd
   sp
-}
-
-function cf_migrations(){
-  cd ~/workspace/cf-release
-  if [[ -z "$1" ]] ; then
-    LAST_TWO_TAGS=$(git tag |egrep '^v\d+'|tr -d 'v'|sort -n|tail -2| parallel -n2 echo "v{1}..v{2}")
-  else
-    LAST_TWO_TAGS=$1
-  fi
-  echo "Checking tags $LAST_TWO_TAGS for db migrations in the cloud_controller_ng"
-  CC_COMMITS_FOR_LAST_REQUESTED_TAGS=$(git diff $LAST_TWO_TAGS -- src/cloud_controller_ng | tail -2| pcut | cut -c 1-8 | parallel -n2 echo "{1}..{2}")
-  echo "Tags $LAST_TWO_TAGS corrospond to cc commits $CC_COMMITS_FOR_LAST_REQUESTED_TAGS"
-  cd src/cloud_controller_ng
-  git fc $CC_COMMITS_FOR_LAST_REQUESTED_TAGS -- db/migrations
-}
-
-function aws_prod_ro(){
-  if [[ -d ~/workspace/prod-aws/config ]] ; then
-  local RO_KEYS=$(find ~/workspace/prod-aws -name aws_readonly_keys)
-    source $RO_KEYS
-    aws $*
-    unset AWS_ACCESS_KEY_ID
-    unset AWS_SECRET_ACCESS_KEY
-  else
-    cd ~/workspace
-    gerrit_key
-    git clone git@github.com:pivotal-cf/prod-aws.git
-  fi
-}
-
-function all_the_repos() {
-  gerrit_key
-  mkdir -p ~/workspace
-  pushd ~/workspace
-
-  for i in bosh cf-release ; do
-    [[ -d $i ]] || GET_ME+="$i "
-  done
-  echo $GET_ME
-  [[ ! -z $GET_ME ]] && parallel -j 25 -rt --keep git clone git@github.com:cloudfoundry/{} ::: $GET_ME
-  unset GET_ME
-
-  for i in prod-aws deployments-aws bosh-jumpbox cloudops-tools prod-keys staging-aws jumpbox-release ; do
-    [[ -d $i ]] || GET_ME+="$i "
-  done
-
-  unset GET_ME
-  [[ ! -z $GET_ME ]] && parallel -j 25 -rt --keep git clone git@github.com:pivotal-cf/{} ::: $GET_ME
-  unset GET_ME
-  popd
 }
 
 
@@ -925,18 +498,6 @@ function tmate_install() {
 
 }
 
-
-function bosh_jobs_list() {
-  for i in $* ; do
-    echo -e "Jobs for $i\n===================="
-    print_between -s '^jobs:' -e '^network' $i --not-last |
-    egrep '^name' |
-    perl -pe 's/_z\d+//xms' |
-    pcut |
-    uniq
-    echo
-  done
-}
 
 function vim_config() {
   git clone https://github.com/Casecommons/vim-config.git ~/.vim
