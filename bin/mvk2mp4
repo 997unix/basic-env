@@ -1,0 +1,94 @@
+#!/usr/bin/perl
+use strict;
+use warnings;
+use File::Basename;
+
+=head1 NAME
+
+convert.pl - Convert MKV files to MP4
+
+=head1 SYNOPSIS
+
+convert.pl file|glob|directory
+
+=head1 DESCRIPTION
+
+This script uses FFmpeg to convert MKV files to MP4. It can handle a single file, multiple files using a glob, or all files in a directory.
+
+=head1 OPTIONS
+
+=over 8
+
+=item B<--help>
+
+Print a brief help message and exits.
+
+=back
+
+=head1 EXAMPLES
+
+=over 8
+
+=item B<convert.pl input.mkv>
+
+Converts the file input.mkv to input.mp4.
+
+=item B<convert.pl '*.mkv'>
+
+Converts all MKV files in the current directory to MP4.
+
+=item B<convert.pl /path/to/directory/>
+
+Converts all MKV files in the specified directory to MP4.
+
+=back
+
+=head1 AUTHOR
+
+Written by Your Name.
+
+=head1 REPORTING BUGS
+
+Report bugs to <your.email@example.com>.
+
+=head1 COPYRIGHT
+
+Copyright (C) 2024 Your Name. License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
+This is free software: you are free to change and redistribute it. There is NO WARRANTY, to the extent permitted by law.
+
+=cut
+
+# Check for help argument
+if ($ARGV[0] eq '--help') {
+    system("perldoc $0");
+    exit;
+}
+
+# Get input argument
+my $input = $ARGV[0];
+
+# Check if input is a directory
+if (-d $input) {
+    # Convert all MKV files in directory
+    my @files = glob "$input/*.mkv";
+    convert_files(@files);
+} elsif (-f $input) {
+    # Convert single file
+    convert_files($input);
+} else {
+    # Assume input is a glob and convert matching files
+    my @files = glob $input;
+    convert_files(@files);
+}
+
+sub convert_files {
+    my @files = @_;
+    for my $file (@files) {
+        my ($name, $dir, $ext) = fileparse($file, qr/\.[^.]*/);
+        if ($ext eq '.mkv') {
+            my $output = "$dir$name.mp4";
+            system("ffmpeg -i $file -codec copy $output");
+        }
+    }
+}
+
